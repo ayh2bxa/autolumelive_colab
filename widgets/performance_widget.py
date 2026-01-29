@@ -16,7 +16,13 @@ import torch.cuda
 from utils.gui_utils import imgui_utils
 from pythonosc.osc_server import BlockingOSCUDPServer
 from pythonosc.udp_client import SimpleUDPClient
-import NDIlib as ndi
+
+try:
+    import NDIlib as ndi
+    NDI_AVAILABLE = True
+except ImportError:
+    NDI_AVAILABLE = False
+    print("Warning: NDIlib not available. NDI output will be disabled.")
 
 # ----------------------------------------------------------------------------
 class PerformanceWidget:
@@ -29,7 +35,14 @@ class PerformanceWidget:
         self.force_fp32 = False
         self.use_superres = False
         self.scale_factor = 0
-        self.device = "cuda" if torch.cuda.is_available() else 'cpu'
+        # Initialize device with priority: CUDA > MPS > CPU
+        if torch.cuda.is_available():
+            self.device = "cuda"
+        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            self.device = "mps"
+        else:
+            self.device = 'cpu'
+        self.mps_available = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
         self.custom_kernel_available = False
     
 
@@ -128,7 +141,7 @@ class PerformanceWidget:
                 self.viz.server_thread.start()
                 self.viz.osc_client = SimpleUDPClient(self.viz.in_ip, self.viz.in_port)
 
-            if changed_ndi:
+            if changed_ndi and NDI_AVAILABLE:
                         send_settings = ndi.SendCreate()
                         send_settings.ndi_name = self.viz.ndi_name
                         ndi.send_destroy(self.viz.ndi_send)
@@ -142,6 +155,12 @@ class PerformanceWidget:
                 if imgui.checkbox("GPU", self.device == "cuda")[0]:
                     if torch.cuda.is_available():
                         self.device = "cuda"
+
+            imgui.same_line()
+            with imgui_utils.grayed_out(not self.mps_available):
+                if imgui.checkbox("MPS", self.device == "mps")[0]:
+                    if self.mps_available:
+                        self.device = "mps"
 
             imgui.same_line()
 

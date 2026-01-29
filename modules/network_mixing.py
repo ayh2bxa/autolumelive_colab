@@ -147,16 +147,18 @@ class MixingModule:
         imgui.text(f"Loading model...{name}")
         imgui.end()
         print("loading model starting get function, should be showing a window", name)
-        net, data = self.get_network(resolved, 'G_ema')
+        result = self.get_network(resolved, 'G_ema')
 
-        # if net is an exception then show a popup with the error
-        if isinstance(net, Exception):
+        # if result is an exception then show a popup with the error
+        if isinstance(result, Exception):
             imgui.open_popup('Error##pkl')
-            print("error", net)
+            print("error", result)
             if imgui.begin_popup('Error##pkl'):
-                imgui.text(f'Failed to load network pickle because of the following error: {net}')
+                imgui.text(f'Failed to load network pickle because of the following error: {result}')
                 imgui.end_popup()
             return
+
+        net, data = result
 
         print("Net is:", net)
         if m == 1:

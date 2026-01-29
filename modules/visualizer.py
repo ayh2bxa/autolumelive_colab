@@ -38,7 +38,13 @@ from audio.audio_stream import NoMicrophoneError
 from pythonosc.osc_server import BlockingOSCUDPServer
 from pythonosc.dispatcher import Dispatcher
 from pythonosc.udp_client import SimpleUDPClient
-import NDIlib as ndi
+
+try:
+    import NDIlib as ndi
+    NDI_AVAILABLE = True
+except ImportError:
+    NDI_AVAILABLE = False
+    ndi = None
 
 import glfw
 from OpenGL import GL as gl
@@ -135,10 +141,14 @@ class Visualizer:
 
         # NDI parameters
         self.ndi_name = 'Autolume Live'
-        send_settings = ndi.SendCreate()
-        send_settings.ndi_name = self.ndi_name
-        self.ndi_send = ndi.send_create(send_settings)
-        self.video_frame = ndi.VideoFrameV2()
+        if NDI_AVAILABLE:
+            send_settings = ndi.SendCreate()
+            send_settings.ndi_name = self.ndi_name
+            self.ndi_send = ndi.send_create(send_settings)
+            self.video_frame = ndi.VideoFrameV2()
+        else:
+            self.ndi_send = None
+            self.video_frame = None
 
         # Internals.
 
@@ -554,7 +564,7 @@ class Visualizer:
             self.server.shutdown()
             self.server = None
 
-        if self.ndi_send is not None:
+        if self.ndi_send is not None and NDI_AVAILABLE:
             ndi.send_destroy(self.ndi_send)
             self.ndi_send = None
 
@@ -877,9 +887,10 @@ class Visualizer:
                     except Exception:
                         pass
                 
-                self.video_frame.data = img
-                self.video_frame.FourCC = ndi.FOURCC_VIDEO_TYPE_BGRX
-                ndi.send_send_video_v2(self.ndi_send, self.video_frame)
+                if NDI_AVAILABLE and self.video_frame is not None:
+                    self.video_frame.data = img
+                    self.video_frame.FourCC = ndi.FOURCC_VIDEO_TYPE_BGRX
+                    ndi.send_send_video_v2(self.ndi_send, self.video_frame)
                 if self._tex_obj is None or not self._tex_obj.is_compatible(image=self._tex_img):
                     self._tex_obj = gl_utils.Texture(image=self._tex_img, bilinear=False, mipmap=False)
                 else:

@@ -26,8 +26,16 @@ from modules.network_mixing import extract_conv_names, extract_mapping_names
 import os
 import pickle
 
-super_res = SRVGGNetPlus(num_in_ch=3, num_out_ch=3, num_feat=48, upscale=4, act_type='prelu').eval().to("cuda" if torch.cuda.is_available() else "cpu")
-model_sd=torch.load('./sr_models/Fast.pt', map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+# Helper function to detect best available device
+def _get_default_device():
+    if torch.cuda.is_available():
+        return "cuda"
+    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+        return "mps"
+    return "cpu"
+
+super_res = SRVGGNetPlus(num_in_ch=3, num_out_ch=3, num_feat=48, upscale=4, act_type='prelu').eval().to(_get_default_device())
+model_sd=torch.load('./sr_models/Fast.pt', map_location=torch.device(_get_default_device()))
 super_res.load_state_dict(model_sd)
 
 # ----------------------------------------------------------------------------
@@ -220,8 +228,16 @@ def slerp(t, v0, v1, DOT_THRESHOLD=0.9995):
 class Renderer:
     def __init__(self):
         self.step_y = 100
-        self._device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        self.kernel_type = "cuda" if torch.cuda.is_available() else "cpu"
+        # Initialize device with priority: CUDA > MPS > CPU
+        if torch.cuda.is_available():
+            self._device = torch.device('cuda')
+            self.kernel_type = "cuda"
+        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            self._device = torch.device('mps')
+            self.kernel_type = "mps"
+        else:
+            self._device = torch.device('cpu')
+            self.kernel_type = "cpu"
         self._pkl_data = dict()  # {pkl: dict | CapturedException, ...}
         self._networks = dict()  # {cache_key: torch.nn.Module, ...}
         self._pinned_bufs = dict()  # {(shape, dtype): torch.Tensor, ...}
@@ -318,7 +334,10 @@ class Renderer:
         key = (tuple(ref.shape), ref.dtype)
         buf = self._pinned_bufs.get(key, None)
         if buf is None:
-            buf = torch.empty(ref.shape, dtype=ref.dtype).pin_memory()
+            buf = torch.empty(ref.shape, dtype=ref.dtype)
+            # Only pin memory for CUDA (not supported on MPS)
+            if self._device.type == 'cuda':
+                buf = buf.pin_memory()
             self._pinned_bufs[key] = buf
         return buf
 
@@ -800,7 +819,9 @@ class Renderer:
                 if isinstance(out, tuple):
                     out = out[0]
                 if use_superres:
-                    with torch.autocast("cuda" if self._device.type == "cuda" else "cpu"):
+                    # MPS doesn't support torch.autocast("mps"), use "cpu" mode instead
+                    device_type = "cpu" if self._device.type == "mps" else ("cuda" if self._device.type == "cuda" else "cpu")
+                    with torch.autocast(device_type):
                         out = super_res(out)
         except CaptureSuccess as e:
             out = e.out
@@ -854,13 +875,23 @@ class Renderer:
     def set_device(self, device):
         if device != self.kernel_type:
             self.kernel_type = device
-            self._device = torch.device("cuda" if device == "custom" else device)
+            # Map device strings to torch.device, handling special cases
+            if device == "custom":
+                self._device = torch.device("cuda")
+            elif device == "mps":
+                self._device = torch.device("mps")
+            elif device == "cuda":
+                self._device = torch.device("cuda")
+            else:  # cpu
+                self._device = torch.device("cpu")
+
+            # Timing events: CUDA uses GPU events, MPS and CPU use time.time()
             if self._device.type == 'cuda':
                 self._start_event = torch.cuda.Event(enable_timing=True)
                 self._end_event = torch.cuda.Event(enable_timing=True)
                 self._start_event.record()
                 self._end_event.record()
-            else:
+            else:  # MPS or CPU
                 self._start_event = time.time()
                 self._end_event = time.time()
 
