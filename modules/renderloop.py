@@ -1,9 +1,6 @@
 import gc
 import multiprocessing
-<<<<<<< HEAD
-=======
 import queue
->>>>>>> 9775bae (Initial commit with code only (no model files))
 import torch
 
 import dnnlib
@@ -60,28 +57,14 @@ class AsyncRenderer:
 
     def set_args(self, **args):
         if not self._closed:
-<<<<<<< HEAD
-            if self._args_queue.qsize() == 0:
-                if not compare_args(args, self._cur_args):
-                    self._args_queue.put([args, self._cur_stamp])
-                self._cur_args = args
-=======
             # Skip qsize() check for macOS compatibility - just update if changed
             if not compare_args(args, self._cur_args):
                 self._args_queue.put([args, self._cur_stamp])
             self._cur_args = args
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
     def get_result(self):
         if not self._closed:
             if self._result_queue is not None:
-<<<<<<< HEAD
-                if self._result_queue.qsize() > 0:
-                    result, stamp = self._result_queue.get()
-                    while self._result_queue.qsize() > 0:
-                        result, stamp = self._result_queue.get()
-                    self._cur_result = result
-=======
                 # Use get_nowait() instead of qsize() for macOS compatibility
                 try:
                     result, stamp = self._result_queue.get_nowait()
@@ -94,7 +77,6 @@ class AsyncRenderer:
                     self._cur_result = result
                 except queue.Empty:
                     pass
->>>>>>> 9775bae (Initial commit with code only (no model files))
             return self._cur_result
 
     def clear_result(self):
@@ -115,18 +97,18 @@ class AsyncRenderer:
         new_arg = False
         with torch.inference_mode():
             while True:
-<<<<<<< HEAD
-                if args_queue.qsize() > 0:
-                    args, stamp = args_queue.get()
-                    new_arg = True
-=======
-                # Use get_nowait() instead of qsize() for macOS compatibility
+                # Drain args queue to get the most recent args (reduces latency)
                 try:
                     args, stamp = args_queue.get_nowait()
                     new_arg = True
+                    # Get all remaining items to skip intermediate updates (macOS-compatible)
+                    while True:
+                        try:
+                            args, stamp = args_queue.get_nowait()
+                        except queue.Empty:
+                            break
                 except queue.Empty:
                     pass
->>>>>>> 9775bae (Initial commit with code only (no model files))
                 if new_arg:
                     with torch.no_grad():
                         result = renderer_obj.render(**args)
