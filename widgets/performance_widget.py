@@ -151,15 +151,12 @@ class PerformanceWidget:
                 self.device = "cpu"
 
             imgui.same_line()
-            with imgui_utils.grayed_out(not torch.cuda.is_available()):
-                if imgui.checkbox("GPU", self.device == "cuda")[0]:
+            gpu_available = torch.cuda.is_available() or self.mps_available
+            with imgui_utils.grayed_out(not gpu_available):
+                if imgui.checkbox("GPU", self.device in ["cuda", "mps"])[0]:
                     if torch.cuda.is_available():
                         self.device = "cuda"
-
-            imgui.same_line()
-            with imgui_utils.grayed_out(not self.mps_available):
-                if imgui.checkbox("MPS", self.device == "mps")[0]:
-                    if self.mps_available:
+                    elif self.mps_available:
                         self.device = "mps"
 
             imgui.same_line()
