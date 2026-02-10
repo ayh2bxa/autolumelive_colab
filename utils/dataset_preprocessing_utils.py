@@ -5,6 +5,10 @@ import numpy as np
 import cv2
 import PIL.Image
 import PIL.ImageOps
+<<<<<<< HEAD
+=======
+import subprocess
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 import torchvision.transforms as transforms
 import ffmpeg
 
@@ -30,6 +34,7 @@ class DatasetPreprocessingUtils:
 
 
     def load_images(self, image_path):
+<<<<<<< HEAD
         """Load image, normalize color space to RGB, and handle EXIF orientation."""
         pil_image = None
         if isinstance(image_path, str):
@@ -68,6 +73,82 @@ class DatasetPreprocessingUtils:
         pil_image = pil_image.convert('RGB')
         image = np.array(pil_image)
 
+=======
+        """Load image with color space handling and EXIF orientationfor dataset processing."""
+        if isinstance(image_path, str):
+            pil_image = PIL.Image.open(image_path)
+            
+            # Handle EXIF orientation data
+            pil_image = PIL.ImageOps.exif_transpose(pil_image)
+            
+            # Handle 16-bit and high bit-depth images
+            if pil_image.mode == 'I':  # 16-bit grayscale
+                print(f"Converting 16-bit grayscale image to 8-bit: {image_path}")
+                pil_image = pil_image.convert('L')  # Convert to 8-bit grayscale
+            elif pil_image.mode == 'F':  # 32-bit float
+                print(f"Converting 32-bit float image to 8-bit: {image_path}")
+                pil_image = pil_image.convert('L')  # Convert to 8-bit grayscale
+            elif pil_image.mode == 'LA':  # 16-bit grayscale + alpha
+                print(f"Converting 16-bit grayscale+alpha image to RGB: {image_path}")
+                pil_image = pil_image.convert('RGB')  # Convert to RGB, dropping alpha
+            elif pil_image.mode == 'I;16':  # 16-bit grayscale (alternative format)
+                print(f"Converting 16-bit grayscale image to 8-bit: {image_path}")
+                pil_image = pil_image.convert('L')  # Convert to 8-bit grayscale
+            elif pil_image.mode == 'I;16B':  # 16-bit grayscale big-endian
+                print(f"Converting 16-bit grayscale image to 8-bit: {image_path}")
+                pil_image = pil_image.convert('L')  # Convert to 8-bit grayscale
+            elif pil_image.mode == 'I;16L':  # 16-bit grayscale little-endian
+                print(f"Converting 16-bit grayscale image to 8-bit: {image_path}")
+                pil_image = pil_image.convert('L')  # Convert to 8-bit grayscale
+            
+            # Convert to RGB (handles palette mode, CMYK, LAB, HSV, etc.)
+            if pil_image.mode == 'P':
+                pil_image = pil_image.convert('RGB')  # Convert limited palette images to RGB
+            elif pil_image.mode == 'L':  # 8-bit grayscale
+                pil_image = pil_image.convert('RGB')  # Convert grayscale to RGB
+            elif pil_image.mode != 'RGB':
+                pil_image = pil_image.convert('RGB')  # Convert other modes (CMYK, LAB, HSV, etc.) to RGB
+            
+            # Convert to numpy array
+            image = np.array(pil_image)
+        else:
+            # Assume it's already a numpy array
+            image = image_path
+            
+            # Convert numpy array to PIL Image for better color space handling
+            if len(image.shape) == 2:
+                # Grayscale image
+                pil_image = PIL.Image.fromarray(image, mode='L')
+            elif len(image.shape) == 3:
+                if image.shape[2] == 1:
+                    # Single channel grayscale
+                    pil_image = PIL.Image.fromarray(image[:, :, 0], mode='L')
+                elif image.shape[2] == 3:
+                    # RGB image
+                    pil_image = PIL.Image.fromarray(image, mode='RGB')
+                elif image.shape[2] == 4:
+                    # RGBA image
+                    pil_image = PIL.Image.fromarray(image, mode='RGBA')
+                else:
+                    # Other formats, try to use first 3 channels
+                    if image.shape[2] > 3:
+                        print(f"Warning: Image has {image.shape[2]} channels, using first 3 channels")
+                        pil_image = PIL.Image.fromarray(image[:, :, :3], mode='RGB')
+                    else:
+                        raise ValueError(f"Unsupported image format: shape={image.shape}")
+            else:
+                raise ValueError(f"Unexpected image format: shape={image.shape}")
+            
+            # Convert to RGB (handles palette mode, CMYK, LAB, HSV, etc.)
+            if pil_image.mode == 'P':
+                pil_image = pil_image.convert('RGB')  # Convert limited palette images to RGB
+            elif pil_image.mode != 'RGB':
+                pil_image = pil_image.convert('RGB')  # Convert other modes (CMYK, LAB, HSV, etc.) to RGB
+            
+            # Convert back to numpy array
+            image = np.array(pil_image)
+        
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         return image
 
     @staticmethod
@@ -120,12 +201,26 @@ class DatasetPreprocessingUtils:
             augmented_images.append(yflipped_image)
         
         return augmented_images
+<<<<<<< HEAD
+=======
+    
+    @staticmethod
+    def get_video_fps(video_path):
+        probe = ffmpeg.probe(video_path)
+        video_info = next(s for s in probe['streams'] if s['codec_type'] == 'video')
+        
+        fps_num, fps_den = map(int, video_info['avg_frame_rate'].split('/'))
+        video_fps = fps_num / fps_den if fps_den != 0 else 0
+        
+        return video_fps
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
     @staticmethod
     def calculate_expected_video_frames(video_path, fps=10):
         probe = ffmpeg.probe(video_path)
         video_info = next(s for s in probe['streams'] if s['codec_type'] == 'video')
 
+<<<<<<< HEAD
         duration = None
         
         if 'duration' in video_info and video_info['duration']:
@@ -161,6 +256,10 @@ class DatasetPreprocessingUtils:
             duration = 0
         
         expected_frames = int(duration * fps) if duration > 0 else 0
+=======
+        duration = float(video_info['duration'])
+        expected_frames = int(duration * fps)
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
         return expected_frames
 
@@ -196,6 +295,7 @@ class DatasetPreprocessingUtils:
             save_path.mkdir(parents=True, exist_ok=True)
 
             output_pattern = str(save_path / f"{video_name}_frame_%05d.jpg")
+<<<<<<< HEAD
             try:
                 ffmpeg.input(video_path).output(output_pattern, vf=f"fps={fps}").run()
                 results.append(str(save_path))
@@ -203,6 +303,23 @@ class DatasetPreprocessingUtils:
                 print(f"FFmpeg failed for {video_path}: {e}")
                 continue
 
+=======
+            cmd = [
+                "ffmpeg",
+                "-i", video_path,
+                "-vf", f"fps={fps}",
+                output_pattern
+            ]
+
+            try:
+                subprocess.run(cmd, check=True)
+                results.append(str(save_path))
+            except subprocess.CalledProcessError as e:
+                print(f"FFmpeg failed for {video_path}: {e}")
+                continue
+        
+        # Send completion signal
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         queue_out.put({'type': 'completed', 'results': results})
     
     @staticmethod
@@ -210,6 +327,10 @@ class DatasetPreprocessingUtils:
         target_size = settings.size
         resize_mode = settings.resizeMode
         
+<<<<<<< HEAD
+=======
+        # Handle non-square settings
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if hasattr(settings, 'nonSquare') and settings.nonSquare:
             image = DatasetPreprocessingUtils.non_square(image, settings)
         else:
@@ -231,6 +352,10 @@ class DatasetPreprocessingUtils:
     @staticmethod
     def non_square(image, settings):
         """Process image with non-square aspect ratio and padding to square"""
+<<<<<<< HEAD
+=======
+        # Extract settings
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         target_size = settings.size
         resize_mode = settings.resizeMode
         width_ratio = settings.nonSquareSettings["widthRatio"]
@@ -312,6 +437,10 @@ class DatasetPreprocessingUtils:
         augmentationSettings = settings.augmentationSettings
         output_path = settings.output_path
         
+<<<<<<< HEAD
+=======
+        # Create output (data) directory if it doesn't exist
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         os.makedirs(output_path, exist_ok=True)
         
         # Debug print settings
@@ -328,6 +457,7 @@ class DatasetPreprocessingUtils:
         print(f"Y-Flip Augmentation: {augmentationSettings['yFlip']}")
         print("=====================================")
         
+<<<<<<< HEAD
         processed_count = 0
         total_source_images = len(images)
         utils = DatasetPreprocessingUtils()
@@ -343,6 +473,20 @@ class DatasetPreprocessingUtils:
                 if not queue.empty():
                     try:
                         if queue.get_nowait() == 'cancel':
+=======
+        # Process each image
+        processed_count = 0
+        total_images = len(images)
+        utils = DatasetPreprocessingUtils()
+        
+        for i, image_path in enumerate(images):
+            try:
+                # Check for cancel signal at the start of each image
+                if not queue.empty():
+                    try:
+                        signal = queue.get_nowait()
+                        if signal == 'cancel':
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                             print("Batch preprocessing cancelled by user")
                             reply.put(['Batch preprocessing cancelled', True])
                             return None
@@ -351,6 +495,7 @@ class DatasetPreprocessingUtils:
                 
                 image = utils.load_images(image_path)
                 
+<<<<<<< HEAD
                 images_to_process = [image]
                 if any(settings.augmentationSettings.values()): 
                     images_to_process.extend(utils.augment_image(image, settings))
@@ -359,6 +504,25 @@ class DatasetPreprocessingUtils:
                     if not queue.empty():
                         try:
                             if queue.get_nowait() == 'cancel':
+=======
+                # PIPELINE: Augmentation → Non-square → Resize
+                
+                # Create list of images to process (original + augmented versions)
+                images_to_process = [image]
+                
+                # Apply augmentation
+                if any(settings.augmentationSettings.values()): 
+                    augmented_images = utils.augment_image(image, settings)
+                    images_to_process.extend(augmented_images)
+                
+                # Process all images (original + augmented)
+                for img_idx, img_to_process in enumerate(images_to_process):
+                    # Check for cancel signal before processing each image
+                    if not queue.empty():
+                        try:
+                            signal = queue.get_nowait()
+                            if signal == 'cancel':
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                                 print("Batch preprocessing cancelled by user")
                                 reply.put(['Batch preprocessing cancelled', True])
                                 return None
@@ -366,6 +530,7 @@ class DatasetPreprocessingUtils:
                             pass
                     
                     processed_image = utils.resize_image_np(img_to_process, settings)
+<<<<<<< HEAD
                     output_filename = f"image_{i:05d}.png" if img_idx == 0 else f"image_{i:05d}_augmented{img_idx}.png"
                     output_filepath = Path(output_path) / output_filename
                     PIL.Image.fromarray(processed_image).save(str(output_filepath), 'PNG', compress_level=1)
@@ -380,6 +545,33 @@ class DatasetPreprocessingUtils:
                             'percentage': (processed_count / total_images * 100) if total_images > 0 else 0,
                             'current_file': Path(image_path).name
                         })
+=======
+                    
+                    if img_idx == 0:
+                        output_filename = f"image_{i:05d}.png"
+                    else:
+                        # Augmented image
+                        output_filename = f"image_{i:05d}_augmented{img_idx}.png"
+                    
+                    # Save processed image
+                    output_filepath = Path(output_path) / output_filename
+                    pil_image = PIL.Image.fromarray(processed_image)
+                    pil_image.save(str(output_filepath), 'PNG', compress_level=1)
+                    processed_count += 1
+                
+                # Send progress update
+                progress_data = {
+                    'type': 'progress',
+                    'current': i + 1,
+                    'total': total_images,
+                    'percentage': ((i + 1) / total_images) * 100,
+                    'current_file': Path(image_path).name
+                }
+                reply.put(progress_data)
+                
+                if (i + 1) % 100 == 0:
+                    print(f"Processed {i + 1}/{len(images)} images...")
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                     
             except Exception as e:
                 print(f"Error processing image {i}: {str(e)}")
@@ -387,6 +579,10 @@ class DatasetPreprocessingUtils:
         
         print(f"Dataset processing completed. {processed_count} images processed and saved to {output_path}")
 
+<<<<<<< HEAD
+=======
+        # Send completion signal
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         completion_data = {
             'type': 'completed',
             'processed_count': processed_count,

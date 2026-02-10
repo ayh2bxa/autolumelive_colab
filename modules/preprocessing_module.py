@@ -1,5 +1,8 @@
-from pathlib import Path
+import os
+<<<<<<< HEAD
 import pandas as pd
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 import imgui
 from utils.gui_utils import imgui_utils
 import multiprocessing as mp
@@ -8,12 +11,42 @@ from widgets.native_browser_widget import NativeBrowserWidget
 from widgets.thumbnail_widget import ThumbnailWidget
 from widgets.image_preview_widget import ImagePreviewWidget
 from widgets.loading_widget import LoadingOverlayManager
+<<<<<<< HEAD
 from widgets.help_icon_widget import HelpIconWidget
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 from utils.dataset_preprocessing_utils import DatasetPreprocessingUtils
 
 resize_mode = ['stretch','center crop']
 padding_color = ['black', 'white', 'bleeding']
 
+<<<<<<< HEAD
+
+def load_help_texts():
+    help_texts = {}
+    help_urls = {}
+    
+    try:
+        csv_path = os.path.join(os.path.dirname(__file__), "help_texts.csv")
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            if 'module' in df.columns:
+                df = df[df['module'] == 'preprocessing']
+            for _, row in df.iterrows():
+                if row.get('key') and row.get('text'):
+                    key = str(row['key']).strip()
+                    text = str(row['text'])
+                    text = text.replace('\\n', '\n')
+                    help_texts[key] = text
+                    if pd.notna(row.get('url')) and str(row['url']).strip():
+                        help_urls[key] = str(row['url']).strip()
+    except Exception as e:
+        print(f"Error loading preprocessing help texts from CSV. Error: {e}")
+    
+    return help_texts, help_urls
+
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 class DataPreprocessing:
     """Data Preprocessing UI"""
     def __init__(self, app):
@@ -34,6 +67,10 @@ class DataPreprocessing:
         self.thumbnail_process = None
         self.is_processing_thumbnails = False
         self.thumbnail_process_started = False
+<<<<<<< HEAD
+=======
+        self.should_start_thumbnails = False
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         
         # Video thumbnail processing
         self.video_thumbnail_queue = mp.Queue()
@@ -58,6 +95,10 @@ class DataPreprocessing:
         self.start_res = self.settings.size 
         self.img_res = self.start_res * (2 ** self.res_factor) # current image resolution
 
+<<<<<<< HEAD
+=======
+        # Non-square framing
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         self.square = True # non-square framing settings (image is square or not)
         
         # Track changes for preview updates
@@ -81,9 +122,13 @@ class DataPreprocessing:
         self.processing_completed = False
         
         self.save_path = self.settings.output_path 
-
+<<<<<<< HEAD
+        
+        self.help_texts, self.help_urls = load_help_texts()
         self.help_icon = HelpIconWidget()
-        self.help_texts, self.help_urls = self.help_icon.load_help_texts("preprocessing")
+=======
+
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
     def __call__(self):
         """Preprocessing content"""
@@ -103,6 +148,7 @@ class DataPreprocessing:
         imgui.begin('Parameters##Preprocessing', closable=False, flags=(
             imgui.WINDOW_NO_RESIZE | imgui.WINDOW_NO_MOVE | imgui.WINDOW_NO_TITLE_BAR | imgui.WINDOW_NO_BRING_TO_FRONT_ON_FOCUS))
         
+<<<<<<< HEAD
         parameter_column_width = first_column_width - 20 
 
         text = "Import Data"
@@ -130,6 +176,15 @@ class DataPreprocessing:
 
         imgui.separator()
  
+=======
+        parameter_column_width = first_column_width - 20  # Account for padding
+
+        # Data import
+        imgui.text("Import Data")
+        imgui.separator()
+ 
+        # Import Images
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if imgui.button("Import Images", width=parameter_column_width, height=30):
             selected_images = self.data_browser.select_image_files()
             duplicates = self.check_for_duplicates(selected_images)
@@ -140,10 +195,14 @@ class DataPreprocessing:
             else:
                 self.imported_files.extend(selected_images)
                 self.thumbnail_widget.update_thumbnails(self.imported_files)
+<<<<<<< HEAD
                 
                 if self.thumbnail_widget.generate_thumbnails and self.imported_files:
                     self._start_background_thumbnail_generation()
                 
+=======
+                # Reset preview tracking when new files are added
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                 self.last_selected_file = None
 
         imgui.set_next_window_size(self.app.content_width // 2.5, self.app.content_height // 2.5, imgui.ONCE)
@@ -185,6 +244,10 @@ class DataPreprocessing:
                     imgui.close_current_popup()
             imgui.end_popup()
 
+<<<<<<< HEAD
+=======
+        # Import Videos
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if imgui.button("Import Videos", width=parameter_column_width, height=30):
             self.selected_video_files = self.data_browser.select_video_files()
             if self.selected_video_files:
@@ -216,7 +279,10 @@ class DataPreprocessing:
 
             # --- Frame Extraction FPS ---
             imgui.text("FPS for Video Extraction:")
+<<<<<<< HEAD
             self.help_icon.render(self.help_texts.get("fps_video_extraction"))
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             
             min_fps = 1
             max_fps = 120
@@ -265,15 +331,17 @@ class DataPreprocessing:
                             frames_paths = progress_data.get('results', [])
                             
                             for frames_dir in frames_paths:
-                                frame_path = Path(frames_dir)
-                                frame_files = [str(f) for f in frame_path.iterdir()]
+                                frame_files = [os.path.join(frames_dir, f) for f in os.listdir(frames_dir)]
                                 self.imported_files.extend(frame_files)
 
                             self.thumbnail_widget.update_thumbnails(self.imported_files)
+<<<<<<< HEAD
                             
                             if self.thumbnail_widget.generate_thumbnails and self.imported_files:
                                 self._start_background_thumbnail_generation()
                             
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                             # Reset variables
                             self.selected_video_files = [] 
                             self.is_processing_video = False
@@ -318,6 +386,10 @@ class DataPreprocessing:
             scroll_height = popup_height - 80
             
             imgui.begin_child("VideoThumbnailsScroll", width=0, height=scroll_height, border=False)
+<<<<<<< HEAD
+=======
+            # Display video thumbnails using separate video thumbnail widget
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
             video_available_width = right_popup_width - 50
             video_available_height = scroll_height - 60 
@@ -368,6 +440,7 @@ class DataPreprocessing:
         input_width = int(parameter_column_width * 0.25)
 
         # Image options
+<<<<<<< HEAD
         header_opened = imgui.collapsing_header("Image Options", flags=imgui.TREE_NODE_DEFAULT_OPEN)[0]
         
         imgui.same_line()
@@ -379,19 +452,35 @@ class DataPreprocessing:
         self.help_icon.render_with_url(self.help_texts.get("image_options"), self.help_urls.get("image_options"), "Read More")
         
         if header_opened:
+=======
+        if imgui.collapsing_header("Image Options", flags=imgui.TREE_NODE_DEFAULT_OPEN)[0]:
+
+            # Image resizing options
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             imgui.text("Resize Mode")
             imgui.same_line()
             changed_resize, new_resize_mode = imgui.combo("##resize_mode", self.settings.resizeMode, resize_mode)
             if changed_resize:
                 self.settings.resizeMode = new_resize_mode
 
+<<<<<<< HEAD
+=======
+            # Image resolution
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             imgui.text("Resolution")
             imgui.same_line()
             
             with imgui_utils.item_width(input_width):
                 imgui.input_text("##res_w", str(self.img_res), 512, flags=imgui.INPUT_TEXT_READ_ONLY)
+<<<<<<< HEAD
             imgui.same_line()
             imgui.text("x")
+=======
+
+            imgui.same_line()
+            imgui.text("x")
+
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             imgui.same_line()
             with imgui_utils.item_width(input_width):
                 imgui.input_text("##res_h", str(self.img_res), 512, flags=imgui.INPUT_TEXT_READ_ONLY)
@@ -408,6 +497,7 @@ class DataPreprocessing:
                 self.img_res = self.start_res * (2 ** self.res_factor)
                 self.settings.size = self.img_res
             
+<<<<<<< HEAD
             # Non-square settings checkbox
             clicked, non_square = imgui.checkbox("Non-square Framing", not self.square)
             if clicked:
@@ -417,12 +507,29 @@ class DataPreprocessing:
             if not self.square:
                 imgui.text("Aspect Ratio:")
                 
+=======
+            # Non-square settings
+            clicked, non_square = imgui.checkbox("Non-square Framing", not self.square)
+            if clicked:
+                self.square = not non_square # self.square = (not true) -> false
+                self.settings.nonSquare = not self.square
+            
+            # Show non-square settings            
+            if not self.square:
+                imgui.text("Aspect Ratio:")
+                
+                # Width Ratio
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                 imgui.text("Width Ratio")
                 imgui.same_line()
                 changed_width, new_width_ratio = imgui.input_int("##width_ratio", self.settings.nonSquareSettings["widthRatio"])
                 if changed_width and new_width_ratio >= 1:
                     self.settings.nonSquareSettings["widthRatio"] = new_width_ratio
 
+<<<<<<< HEAD
+=======
+                # Height Ratio
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                 imgui.text("Height Ratio")
                 imgui.same_line()
                 changed_height, new_height_ratio = imgui.input_int("##height_ratio", self.settings.nonSquareSettings["heightRatio"])
@@ -449,6 +556,7 @@ class DataPreprocessing:
 
         # End of Image options
 
+<<<<<<< HEAD
         augmentation_header_opened = imgui.collapsing_header("Augmentation", flags=imgui.TREE_NODE_DEFAULT_OPEN)[0]
         
         imgui.same_line()
@@ -464,6 +572,13 @@ class DataPreprocessing:
             if xflip_clicked:
                 self.settings.augmentationSettings["xFlip"] = new_xflip
 
+=======
+        # Augmentation
+        if imgui.collapsing_header("Augmentation", flags=imgui.TREE_NODE_DEFAULT_OPEN)[0]:
+            xflip_clicked, new_xflip = imgui.checkbox("X-Flip", self.settings.augmentationSettings["xFlip"])
+            if xflip_clicked:
+                self.settings.augmentationSettings["xFlip"] = new_xflip
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             yflip_clicked, new_yflip = imgui.checkbox("Y-Flip", self.settings.augmentationSettings["yFlip"])
             if yflip_clicked:
                 self.settings.augmentationSettings["yFlip"] = new_yflip
@@ -472,9 +587,18 @@ class DataPreprocessing:
 
         imgui.separator()
         
+<<<<<<< HEAD
         imgui.text("Folder Name")
         total_width = parameter_column_width - 20
         folder_name_width = total_width * 0.75  
+=======
+        # Folder Name for processed dataset
+        imgui.text("Folder Name")
+        
+        total_width = parameter_column_width - 20
+        folder_name_width = total_width * 0.75  
+        suffix_width = total_width * 0.25 
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         
         with imgui_utils.item_width(folder_name_width):
             changed, new_folder_name = imgui.input_text("##folder_name", self.settings.folder_name, 1024)
@@ -483,9 +607,14 @@ class DataPreprocessing:
         imgui.same_line()
         imgui.text(f"_{self.settings.size}x{self.settings.size}")
 
+<<<<<<< HEAD
         imgui.text("Save Path")
         self.help_icon.render(self.help_texts.get("save_path"))
         
+=======
+        # Parent Directory Path
+        imgui.text("Directory Path")
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         _, new_save_path = imgui_utils.input_text("##save_path", self.save_path, 1024, 0, 
         width=parameter_column_width - imgui.calc_text_size("Browse##save_path")[0] + 8)
         if new_save_path != self.save_path:
@@ -493,6 +622,7 @@ class DataPreprocessing:
         
         imgui.same_line()
         if imgui.button("Browse##save_path", width=self.app.button_w, height=25):
+<<<<<<< HEAD
             directory_path = self.data_browser.select_directory("Select Save Path")
             if directory_path:
                 self.save_path = directory_path.replace('\\', '/')
@@ -501,6 +631,17 @@ class DataPreprocessing:
         
         imgui.spacing()
         
+=======
+            directory_path = self.data_browser.select_directory("Select Parent Directory")
+            if directory_path:
+                self.save_path = directory_path.replace('\\', '/')
+            else:
+                print("No parent directory selected")
+        
+        imgui.spacing()
+        
+        # Process Dataset button
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if imgui.button("Process & Save Data", width=parameter_column_width, height=30):
             if not self.imported_files:
                 print("No images to process.")
@@ -510,7 +651,7 @@ class DataPreprocessing:
                 proposed_output_path = self._construct_output_path()
                 self.settings.output_path = proposed_output_path
                 
-                if Path(proposed_output_path).exists():
+                if os.path.exists(proposed_output_path):
                     self.folder_exists_warning = True
                 else:
                     self.folder_exists_warning = False
@@ -561,6 +702,10 @@ class DataPreprocessing:
                 imgui.text(f"Resolution: {self.settings.size}x{self.settings.size}")
                 imgui.text(f"Resize Mode: {resize_mode[self.settings.resizeMode]}")
                 
+<<<<<<< HEAD
+=======
+                # Non-square settings
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                 if self.settings.nonSquare:
                     imgui.text("Non-square settings:")
                     imgui.indent(20)
@@ -585,6 +730,7 @@ class DataPreprocessing:
                 imgui.separator()
                 imgui.spacing()
                 
+<<<<<<< HEAD
                 latest_progress = None
                 while not self.processing_reply.empty():
                     try:
@@ -606,6 +752,29 @@ class DataPreprocessing:
                     self.progress_percentage = latest_progress.get('percentage', 0)
                     self.progress_file = latest_progress.get('current_file', '')
                 
+=======
+                # Check for progress updates
+                if not self.processing_reply.empty():
+                    try:
+                        progress_data = self.processing_reply.get_nowait()
+                        
+                        if progress_data.get('type') == 'completed':
+                            self.processing_completed = True
+                            self.is_processing_dataset = False
+                            # Terminate the background process
+                            if hasattr(self, 'processing_process') and self.processing_process.is_alive():
+                                self.processing_process.terminate()
+                                self.processing_process.join(timeout=5) 
+                        elif progress_data.get('type') == 'progress':
+                            self.progress_current = progress_data.get('current', 0)
+                            self.progress_total = progress_data.get('total', 0)
+                            self.progress_percentage = progress_data.get('percentage', 0)
+                            self.progress_file = progress_data.get('current_file', '')
+                    except:
+                        pass
+                
+                # Display progress
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                 imgui.text(f"Processing: {self.progress_current}/{self.progress_total} images")
                 if self.progress_file:
                     imgui.text(f"Current File: {self.progress_file}")
@@ -622,7 +791,11 @@ class DataPreprocessing:
                     self.processing_queue.put('cancel')
                     self.cancel_processing = True
                     self.is_processing_dataset = False
+<<<<<<< HEAD
 
+=======
+                    # Reset progress variables when processing is cancelled
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                     self.reset_progress_variables()
                     imgui.close_current_popup()
             
@@ -672,6 +845,10 @@ class DataPreprocessing:
         imgui.spacing()
         
         imgui.separator()
+<<<<<<< HEAD
+=======
+        # Back to Menu button
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if imgui.button("Back to Menu", width=parameter_column_width, height=30):
             self.cleanup()
             self.app.set_visible_menu()
@@ -689,23 +866,40 @@ class DataPreprocessing:
         imgui.same_line()
         imgui.text(f"({len(self.imported_files)} images)")
         
+<<<<<<< HEAD
         imgui.same_line(position=imgui.get_window_width() - imgui.calc_text_size("Render Thumbnail")[0] - imgui.calc_text_size("Select All")[0] - 70)
 
         prev_thumbnail_mode = self.thumbnail_widget.generate_thumbnails
+=======
+        # Position checkbox and button on the right side
+        imgui.same_line(position=imgui.get_window_width() - imgui.calc_text_size("Render Thumbnail")[0] - imgui.calc_text_size("Select All")[0] - 70)
+        # Generate Thumbnail checkbox
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         generate_thumbnails_clicked, self.thumbnail_widget.generate_thumbnails = imgui.checkbox(
             "Render Thumbnail", self.thumbnail_widget.generate_thumbnails
         )
 
         imgui.same_line()
         
+<<<<<<< HEAD
+=======
+        # Select All thumbnails button
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if imgui.button("Select All"):
             self.thumbnail_widget.select_all()
         
         if generate_thumbnails_clicked:
+<<<<<<< HEAD
             new_thumbnail_mode = self.thumbnail_widget.generate_thumbnails
             self.thumbnail_widget.set_thumbnail_mode(new_thumbnail_mode, prev_thumbnail_mode)
             if new_thumbnail_mode and self.imported_files:
                 self._start_background_thumbnail_generation()
+=======
+            self.thumbnail_widget.set_thumbnail_mode(self.thumbnail_widget.generate_thumbnails)
+            # Handle starting/stopping background processing
+            if self.thumbnail_widget.generate_thumbnails and self.imported_files:
+                self.should_start_thumbnails = True
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             else:
                 self._stop_background_thumbnail_generation()
 
@@ -723,7 +917,17 @@ class DataPreprocessing:
         # End Thumbnails Scroll
         
         self._check_background_thumbnail_results()
+<<<<<<< HEAD
 
+=======
+        
+        if self.should_start_thumbnails:
+            print("Starting thumbnail generation...")
+            self.should_start_thumbnails = False
+            self._start_background_thumbnail_generation()
+
+        # Handle both button click and keyboard delete
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         remove_selected = imgui.button("Remove Selected Images", width=available_width, height=30)
         remove_selected = remove_selected or self.thumbnail_widget.is_delete_pressed()
         
@@ -761,6 +965,10 @@ class DataPreprocessing:
         preview_width = third_column_width - 25
         preview_height = (self.app.content_height - 100)/2
 
+<<<<<<< HEAD
+=======
+        # Determine selected file from thumbnail widget
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         selected_indices = self.thumbnail_widget.get_selected_indices()
         selected_file = None
         if selected_indices:
@@ -769,6 +977,10 @@ class DataPreprocessing:
             if 0 <= selected_idx < len(self.thumbnail_widget.selected_files):
                 selected_file = self.thumbnail_widget.selected_files[selected_idx]
         
+<<<<<<< HEAD
+=======
+        # Only update preview when something changes
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if self._should_update_preview(selected_file):
             if selected_file:
                 self.image_preview_widget.update_preview(selected_file, self.settings, self.preview_original)
@@ -781,6 +993,10 @@ class DataPreprocessing:
 
 
         if selected_file:
+<<<<<<< HEAD
+=======
+            # Get comprehensive image data
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             image_data = self.settings.get_image_data(selected_file)
             
             if image_data['error']:
@@ -857,16 +1073,26 @@ class DataPreprocessing:
             self.imported_files.extend(files_to_add)
         
         self.thumbnail_widget.update_thumbnails(self.imported_files)
+<<<<<<< HEAD
         
         if self.thumbnail_widget.generate_thumbnails and self.imported_files:
             self._start_background_thumbnail_generation()
         
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         self.last_selected_file = None
     # ------------------------------
 
      # --- Background Thumbnail Generation Helper Functions ---
     def _start_background_thumbnail_generation(self):
         """Start background thumbnail generation process"""
+<<<<<<< HEAD
+=======
+        if self.is_processing_thumbnails:
+            return  
+        
+        # Start process if not started or if it died
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if not self.thumbnail_process_started or (self.thumbnail_process is not None and not self.thumbnail_process.is_alive()):
             self.thumbnail_process = mp.Process(
                 target=ThumbnailWidget.process_thumbnails_background,
@@ -874,9 +1100,17 @@ class DataPreprocessing:
             )
             self.thumbnail_process.start()
             self.thumbnail_process_started = True
+<<<<<<< HEAD
 
         self.is_processing_thumbnails = True
         
+=======
+        
+        # Send thumbnail generation request
+        self.is_processing_thumbnails = True
+        
+        # Send request with file paths and thumbnail size
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         request = {
             'type': 'generate_thumbnails',
             'file_paths': self.imported_files,
@@ -887,7 +1121,11 @@ class DataPreprocessing:
     def _start_video_thumbnail_generation(self):
         """Start background thumbnail generation process for video thumbnails"""
         if self.is_processing_video_thumbnails:
+<<<<<<< HEAD
             return  
+=======
+            return  # Already processing
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         
         # Start process if not started or if it died
         if self.video_thumbnail_process is None or not self.video_thumbnail_process.is_alive():
@@ -911,10 +1149,15 @@ class DataPreprocessing:
     def _stop_background_thumbnail_generation(self):
         """Stop background thumbnail generation process"""
         if self.thumbnail_process is not None and self.thumbnail_process.is_alive():
+<<<<<<< HEAD
+=======
+            print("Stopping background thumbnail generation...")
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             try:
                 # Send shutdown signal
                 self.thumbnail_queue.put({'type': 'shutdown'})
                 
+<<<<<<< HEAD
                 self.thumbnail_process.join(timeout=1.0)
                 
                 if self.thumbnail_process.is_alive():
@@ -922,6 +1165,20 @@ class DataPreprocessing:
                     self.thumbnail_process.join(timeout=1.0)
                     
                     if self.thumbnail_process.is_alive():
+=======
+                # Wait for graceful shutdown
+                self.thumbnail_process.join(timeout=1.0)
+                
+                # Force terminate if still alive
+                if self.thumbnail_process.is_alive():
+                    print("Force terminating thumbnail process...")
+                    self.thumbnail_process.terminate()
+                    self.thumbnail_process.join(timeout=1.0)
+                    
+                    # Kill if still alive
+                    if self.thumbnail_process.is_alive():
+                        print("Force killing thumbnail process...")
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                         self.thumbnail_process.kill()
                         self.thumbnail_process.join()
                         
@@ -930,6 +1187,10 @@ class DataPreprocessing:
             finally:
                 self.thumbnail_process = None
         
+<<<<<<< HEAD
+=======
+        # Clear queues
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         try:
             while not self.thumbnail_queue.empty():
                 self.thumbnail_queue.get_nowait()
@@ -944,7 +1205,13 @@ class DataPreprocessing:
         
         # Reset processing state
         self.is_processing_thumbnails = False
+<<<<<<< HEAD
         self.thumbnail_process_started = False
+=======
+        self.should_start_thumbnails = False
+        self.thumbnail_process_started = False
+        print("Background thumbnail generation stopped.")
+>>>>>>> 9775bae (Initial commit with code only (no model files))
     
     def _check_background_thumbnail_results(self):
         """Check for background thumbnail generation results"""
@@ -961,8 +1228,12 @@ class DataPreprocessing:
                     thumbnail_data = result['thumbnail_data']
                     self.thumbnail_widget.update_thumbnail_from_data(file_path, thumbnail_data)
                 elif result['type'] == 'completed':
+<<<<<<< HEAD
                     if self.thumbnail_queue.empty():
                         self.is_processing_thumbnails = False
+=======
+                    self.is_processing_thumbnails = False
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                     
         except Exception as e:
             print(f"Error processing background thumbnail results: {e}")
@@ -1069,7 +1340,7 @@ class DataPreprocessing:
         """Construct output path from parent directory + folder name + resolution"""
         resolution_suffix = f"_{self.settings.size}x{self.settings.size}"
         folder_name_with_resolution = self.settings.folder_name + resolution_suffix
-        return (Path(self.save_path) / folder_name_with_resolution).as_posix()
+        return os.path.join(self.save_path, folder_name_with_resolution).replace('\\', '/')
     
     def process_dataset(self):
         """Start the dataset processing in a separate process"""
@@ -1089,12 +1360,21 @@ class DataPreprocessing:
     # --- Cleanup ---
     def cleanup(self):
         """Clean up multiprocessing resources before destroying the object"""
+<<<<<<< HEAD
+=======
+        print("Cleaning up DataPreprocessing resources...")
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         try:
             self._stop_background_thumbnail_generation()
             self._stop_video_thumbnail_generation()
             
             self.reset_progress_variables()
+<<<<<<< HEAD
 
+=======
+            
+            # Clean up widget resources (especially thumbnails textures to prevent memory leaks)
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             if hasattr(self, 'thumbnail_widget') and self.thumbnail_widget is not None:
                 self.thumbnail_widget.cleanup()
             if hasattr(self, 'video_thumbnail_widget') and self.video_thumbnail_widget is not None:
@@ -1105,11 +1385,18 @@ class DataPreprocessing:
                 self.data_browser.cleanup()
             if hasattr(self, 'loading_widget') and self.loading_widget is not None:
                 self.loading_widget.cleanup()
+<<<<<<< HEAD
             if hasattr(self, 'help_icon') and self.help_icon is not None:
                 self.help_icon.cleanup()
                 
         except Exception as e:
             print(f"Warning: Error during cleanup: {e}")
+=======
+                
+        except Exception as e:
+            print(f"Warning: Error during cleanup: {e}")
+        print("DataPreprocessing cleanup completed.")
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
     def reset_progress_variables(self):
         """Reset progress tracking variables to default values"""

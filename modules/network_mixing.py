@@ -13,7 +13,11 @@ import glob
 import os
 import re
 import pandas as pd
+<<<<<<< HEAD
 from widgets.help_icon_widget import HelpIconWidget
+=======
+
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
 def _locate_results(pattern):
     return pattern
@@ -27,6 +31,56 @@ def extract_conv_names(model):
 def extract_mapping_names(model):
     model_names = [name for name, weight in model.named_parameters() if "mapping" in name]
     return model_names
+
+
+def load_help_texts():
+<<<<<<< HEAD
+    help_texts = {}
+    help_urls = {}
+    
+    try:
+        csv_path = os.path.join(os.path.dirname(__file__), "help_texts.csv")
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            if 'module' in df.columns:
+                df = df[df['module'] == 'network_mixing']
+            for _, row in df.iterrows():
+                if row.get('key') and row.get('text'):
+                    key = str(row['key']).strip()
+                    text = str(row['text'])
+                    text = text.replace('\\n', '\n')
+                    help_texts[key] = text
+                    if pd.notna(row.get('url')) and str(row['url']).strip():
+                        help_urls[key] = str(row['url']).strip()
+    except Exception as e:
+        print(f"Error loading network mixing help texts from CSV. Error: {e}")
+    
+    return help_texts, help_urls
+=======
+    default_texts = {
+        "model1_network_mixing": "First model to mix from",
+        "model2_network_mixing": "Second model to mix from",
+        "output_name_network_mixing": "Name for the combined model",
+        "resolution_layers_network_mixing": "Layer groups by resolution",
+        "model_selection_network_mixing": "Select which model's weights to use for each layer",
+        "recover_network_mixing": "Restore previous layer settings",
+        "disable_network_mixing": "Disable layers from this point"
+    }
+
+    try:
+        excel_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"assets", "help_contents.xlsx")
+        if os.path.exists(excel_path):
+            df = pd.read_excel(excel_path, engine='openpyxl')
+            for _, row in df.iterrows():
+                if pd.notna(row['key']) and pd.notna(row['text']):
+                    key = str(row['key']).strip()
+                    default_texts[key] = str(row['text'])
+            print(f"Successfully loaded network mixing help texts from: {excel_path}")
+    except Exception as e:
+        print(f"Warning: Using default network mixing help texts. Error: {e}")
+    
+    return default_texts
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
 
 class MixingModule:
@@ -50,8 +104,12 @@ class MixingModule:
         self.combined_layers = []
         self.collapsed = []
         self.cached_layers = []
+<<<<<<< HEAD
+        self.help_texts, self.help_urls = load_help_texts()
         self.help_icon = HelpIconWidget()
-        self.help_texts, self.help_urls = self.help_icon.load_help_texts("network_mixing")
+=======
+        self.help_texts = load_help_texts()
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
         for pkl in os.listdir("./models"):
             if pkl.endswith(".pkl"):
@@ -108,19 +166,33 @@ class MixingModule:
             self.pkl2 = net
             self.data2 = data
 
+<<<<<<< HEAD
     def model_selection_gui(self, title, m=1, input_width=None):
         imgui.begin_group()
         imgui.text(title)
 
+=======
+    def model_selection_gui(self, title, m=1):
+        imgui.begin_group()
+        imgui.text(title)
+        imgui.separator()
+>>>>>>> 9775bae (Initial commit with code only (no model files))
         if m == 1:
             model = self.model1
         else:
             model = self.model2
+<<<<<<< HEAD
 
         changed, model = imgui_utils.input_text(f'##surgery{m}', model, 1024,
                                                 flags=(
                                                         imgui.INPUT_TEXT_AUTO_SELECT_ALL | imgui.INPUT_TEXT_ENTER_RETURNS_TRUE),
                                                 width=input_width if input_width is not None else imgui.get_content_region_available_width()/2,
+=======
+        changed, model = imgui_utils.input_text(f'##surgery{m}', model, 1024,
+                                                flags=(
+                                                        imgui.INPUT_TEXT_AUTO_SELECT_ALL | imgui.INPUT_TEXT_ENTER_RETURNS_TRUE),
+                                                width=(100),
+>>>>>>> 9775bae (Initial commit with code only (no model files))
                                                 help_text='<PATH> | <URL> | <RUN_DIR> | <RUN_ID> | <RUN_ID>/<KIMG>.pkl')
         if changed:
             if m == 1:
@@ -197,6 +269,7 @@ class MixingModule:
         spacing = self.app.spacing
         input_width = -(button_width + spacing + help_width + 30)
 
+<<<<<<< HEAD
         imgui.begin_group()
         imgui.text("Mix two models together")
         imgui.same_line()
@@ -214,10 +287,34 @@ class MixingModule:
         self.model_selection_gui("Model 1", 1, input_width)
         imgui.same_line()
         self.model_selection_gui("Model 2", 2, input_width)
+=======
+        # imgui.begin_group()
+        # imgui.text("Combine two models into one")
+        # imgui.same_line()
+        # remaining_width = imgui.get_content_region_available_width()
+        # imgui.dummy(remaining_width - 60, 0)  
+        # imgui.same_line()
+        # if imgui_utils.button("Help", width=50):
+        #     self.show_help = not self.show_help
+        # imgui.end_group()
+
+        imgui.begin_group()
+        imgui.text("Mix two models together")
+        imgui.end_group()
+
+        self.model_selection_gui("Model 1", 1)
+        if self.menu.show_help and imgui.is_item_hovered():
+            imgui.set_tooltip(self.help_texts.get("model1_network_mixing", "Select first model"))
+        
+        imgui.same_line()
+        self.model_selection_gui("Model 2", 2)
+        if self.menu.show_help and imgui.is_item_hovered():
+            imgui.set_tooltip(self.help_texts.get("model2_network_mixing", "Select second model"))
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
         if imgui_utils.button("Combine", enabled=self.pkl1 and self.pkl2,
                               width=imgui.get_content_region_available_width()):
-            imgui.set_next_window_size(1200, 800)
+            imgui.set_next_window_size(800, 800)
             imgui.open_popup("Combine")
 
             layers1 = extract_conv_names(self.pkl1)
@@ -251,6 +348,11 @@ class MixingModule:
                                                         help_text="Name of the output model",
                                                         width=input_width,
                                                         flags=(imgui.INPUT_TEXT_AUTO_SELECT_ALL))
+<<<<<<< HEAD
+=======
+            if self.menu.show_help and imgui.is_item_hovered():
+                imgui.set_tooltip(self.help_texts.get("output_name_network_mixing", "Enter output model name"))
+>>>>>>> 9775bae (Initial commit with code only (no model files))
             imgui.same_line()
             imgui.text(".pkl")
             imgui.same_line()
@@ -264,149 +366,195 @@ class MixingModule:
 
     def display_layers(self, layer1, layer2):
         res_exp = 2
+        help_width = imgui.calc_text_size("(?)").x + 10
         button_width = self.app.button_w
-        style = imgui.get_style()
-
-        imgui.begin_group()
         
-        content_w = imgui.get_content_region_available_width()
-        w_label = max(200, int(content_w * 0.45))
-        w_ckb = (content_w - w_label - button_width - style.item_spacing[0] * 3) // 2
-        w_ckb = max(40, w_ckb)
-        imgui.columns(4, "##header_cols", border=False)
-        imgui.set_column_width(0, w_label)
-        imgui.set_column_width(1, w_ckb)
-        imgui.set_column_width(2, w_ckb)
-        imgui.set_column_width(3, button_width + style.item_spacing[0])
-        imgui.next_column()  
+        imgui.begin_group()
+        imgui.set_cursor_pos((imgui.get_content_region_available_width() // 3 - help_width, imgui.get_cursor_pos()[1]))
         imgui.text(os.path.basename(self.model1))
-        imgui.next_column()
+<<<<<<< HEAD
+        
+        imgui.same_line(imgui.get_content_region_available_width() // 3 * 2 - help_width)
         imgui.text(os.path.basename(self.model2))
-        imgui.next_column()
-        imgui.next_column()
-        imgui.columns(1)
+=======
+        if self.menu.show_help and imgui.is_item_hovered():
+            imgui.set_tooltip(self.help_texts.get("model_selection_network_mixing", "Select layers from first model"))
+        
+        imgui.same_line(imgui.get_content_region_available_width() // 3 * 2 - help_width)
+        imgui.text(os.path.basename(self.model2))
+        if self.menu.show_help and imgui.is_item_hovered():
+            imgui.set_tooltip(self.help_texts.get("model_selection_network_mixing", "Select layers from second model"))
+>>>>>>> 9775bae (Initial commit with code only (no model files))
+        
         imgui.separator()
-
+        # 在分辨率组标题中添加帮助标记
         for i, (l1, l2) in enumerate(zip(layer1, layer2)):
             resolution = 2 ** res_exp
-            l1_res = int(re.search(r'\d+', l1).group()) if l1 else 0
-            l2_res = int(re.search(r'\d+', l2).group()) if l2 else 0
+            l1_res = 0
+            l2_res = 0
+            if l1:
+                l1_res = int(re.search(r'\d+', l1).group())
+            if l2:
+                l2_res = int(re.search(r'\d+', l2).group())
 
-            if l1_res != resolution and l2_res != resolution:
-                continue
+            if l1_res == resolution or l2_res == resolution:
+                imgui.begin_child(f"##{resolution}_global", 
+                                0, 
+                                14 * 16 if self.collapsed[i] == "v" else 14 * 2.3,
+                                border=True,
+                                flags=imgui.WINDOW_NO_SCROLLBAR if self.collapsed[i] == ">" else 0)
+                
+                imgui.text(self.collapsed[i])
+                if imgui.is_item_clicked():
+                    self.collapsed[i] = ">" if self.collapsed[i] == "v" else "v"
 
-            style = imgui.get_style()
-            row_h = imgui.get_frame_height_with_spacing()
-            collapsed_h = row_h + style.window_padding[1] * 2
-            expanded_h = 14 * 16
-            child_h = collapsed_h if self.collapsed[i] == ">" else expanded_h
-            imgui.begin_child(f"##{resolution}_global",
-                             0, child_h, border=True,
-                             flags=imgui.WINDOW_NO_SCROLLBAR if self.collapsed[i] == ">" else 0)
+                imgui.same_line()
+                imgui.text(f"Resolution {resolution} x {resolution}")
+                if imgui.is_item_clicked():
+                    self.collapsed[i] = ">" if self.collapsed[i] == "v" else "v"
 
-            cw = imgui.get_content_region_available_width()
-            w_l = max(120, int(cw * 0.45))
-            w_c = (cw - w_l - button_width - style.item_spacing[0] * 3) // 2
-            w_c = max(40, w_c)
-            imgui.columns(4, f"##res_cols_{resolution}", border=False)
-            imgui.set_column_width(0, w_l)
-            imgui.set_column_width(1, w_c)
-            imgui.set_column_width(2, w_c)
-            imgui.set_column_width(3, button_width + style.item_spacing[0])
+<<<<<<< HEAD
+=======
+                if self.menu.show_help and imgui.is_item_hovered():
+                    imgui.set_tooltip(self.help_texts.get("resolution_layers_network_mixing", f"Layers at {resolution}x{resolution} resolution"))
+>>>>>>> 9775bae (Initial commit with code only (no model files))
 
-            # Helper to get resolution matches
-            def matches_for_res(res):
-                m1, m2 = [], []
-                for k, (a, b) in enumerate(zip(layer1, layer2)):
-                    if a and int(re.search(r'\d+', a).group()) == res:
-                        m1 += [k]
-                    if b and int(re.search(r'\d+', b).group()) == res:
-                        m2 += [k]
-                return m1, m2
+                if self.collapsed[i] == ">":
+                    imgui.same_line(imgui.get_content_region_available_width() // 3 - help_width)
 
-            def do_recover(res):
-                for j, (a, b) in enumerate(zip(layer1, layer2)):
-                    r1 = int(re.search(r'\d+', a).group()) if a else 0
-                    r2 = int(re.search(r'\d+', b).group()) if b else 0
-                    if r1 == res * 2 or r2 == res * 2:
-                        self.combined_layers[:j] = copy.deepcopy(self.cached_layers[:j])
-                        return
-                self.combined_layers = copy.deepcopy(self.cached_layers)
+                    # Check if all the layers with the res in the name are already set to Model A or Model B and display if so otherwise display mixed
+                    layer1_matches, layer2_matches = [], []
+                    for k, (layer1tmp, layer2_tmp) in enumerate(zip(layer1, layer2)):
+                        if layer1tmp:
+                            if int(re.search(r'\d+', layer1tmp).group()) == resolution:
+                                layer1_matches += [k]
 
-            # Row 1: arrow + "Resolution N x N" | checkbox | checkbox | X/Recover
-            imgui.text(self.collapsed[i])
-            if imgui.is_item_clicked():
-                self.collapsed[i] = "v" if self.collapsed[i] == ">" else ">"
-            imgui.same_line()
-            imgui.text(f"Resolution {resolution} x {resolution}")
-            if imgui.is_item_clicked():
-                self.collapsed[i] = "v" if self.collapsed[i] == ">" else ">"
-            imgui.next_column()
+                        if layer2_tmp:
+                            if int(re.search(r'\d+', layer2_tmp).group()) == resolution:
+                                layer2_matches += [k]
+                    ckb_display = "A"
+                    if all(np.array(self.combined_layers)[layer1_matches] == "A"):
+                        ckb_display = "A"
+                    elif all(np.array(self.combined_layers)[layer2_matches] == "B") and len(
+                            np.array(self.combined_layers)[layer2_matches]):
+                        ckb_display = "B"
+                    elif all(np.array(self.combined_layers)[layer2_matches] == "X") or all(
+                            np.array(self.combined_layers)[layer1_matches] == "X"):
+                        ckb_display = "X"
+                    else:
+                        ckb_display = "Mixed"
+                    imgui.same_line(imgui.get_content_region_available_width() // 3)
 
-            layer1_matches, layer2_matches = matches_for_res(resolution)
-            ckb_display = "A"
-            if all(np.array(self.combined_layers)[layer1_matches] == "A"):
-                ckb_display = "A"
-            elif all(np.array(self.combined_layers)[layer2_matches] == "B") and len(layer2_matches):
-                ckb_display = "B"
-            elif all(np.array(self.combined_layers)[layer2_matches] == "X") or all(np.array(self.combined_layers)[layer1_matches] == "X"):
-                ckb_display = "X"
-            else:
-                ckb_display = "Mixed"
+                    with imgui_utils.grayed_out(l1 == '' or ckb_display == "X"):
+                        clicked, _ = imgui.checkbox(f"##layer1{i}", ckb_display == "A" or ckb_display == "Mixed")
+                    if clicked and layer1[i] != '' and ckb_display != "X":
+                        print("clicked1")
+                        self.combined_layers[i] = "A"
+                        for j in range(i + 1, len(self.combined_layers)):
+                            if layer1[j]:
+                                res = int(re.search(r'\d+', layer1[j]).group())
+                                if res == resolution and layer1[j]:
+                                    self.combined_layers[j] = "A"
+                    imgui.same_line(imgui.get_content_region_available_width() // 3 * 2)
+                    with imgui_utils.grayed_out(l2 == '' or ckb_display == "X"):
+                        clicked, _ = imgui.checkbox(f"##layer2{i}", ckb_display == "B" or ckb_display == "Mixed")
+                    if clicked and layer2[i] != '' and ckb_display != "X":
+                        print("clicked2")
+                        self.combined_layers[i] = "B"
+                        for j in range(i + 1, len(self.combined_layers)):
+                            if layer2[j]:
+                                res = int(re.search(r'\d+', layer2[j]).group())
+                                if res == resolution and layer2[j]:
+                                    self.combined_layers[j] = "B"
+                    imgui.same_line(imgui.get_window_width() - self.app.button_w)
+                    if self.combined_layers[i] == "X":
+                        if imgui.button(f"Recover##{i}"):
+                            # find last entry in l1 or l2 that has the same resolution as resolution and copy all the layers from self.cached to self.combined up to that point
+                            for j, (l1, l2) in enumerate(zip(layer1, layer2)):
+                                res1 = 0
+                                res2 = 0
+                                if l1:
+                                    res1 = int(re.search(r'\d+', l1).group())
+                                if l2:
+                                    res2 = int(re.search(r'\d+', l2).group())
+                                if res1 == resolution * 2 or res2 == resolution * 2:
+                                    self.combined_layers[:j] = copy.deepcopy(self.cached_layers[:j])
+                                    break
+                                # deal with the last resolution
+                                if j == len(layer1) - 1:
+                                    self.combined_layers = copy.deepcopy(self.cached_layers)
+<<<<<<< HEAD
+                        imgui.same_line()
+=======
+                        if self.menu.show_help and imgui.is_item_hovered():
+                            imgui.set_tooltip(self.help_texts.get("recover_network_mixing", "Restore previous settings"))
+>>>>>>> 9775bae (Initial commit with code only (no model files))
+                    else:
+                        if imgui.button(f"X##{i}"):
+                            self.cached_layers[:i] = copy.deepcopy(self.combined_layers[:i])
+                            self.combined_layers[i] = "X"
+                            self.combined_layers[i + 1:] = ["X"] * (len(self.combined_layers) - i - 1)
+<<<<<<< HEAD
+                        imgui.same_line()
+=======
+                        if self.menu.show_help and imgui.is_item_hovered():
+                            imgui.set_tooltip(self.help_texts.get("disable_network_mixing", "Disable from this point"))
+>>>>>>> 9775bae (Initial commit with code only (no model files))
+                else:
+                    imgui.same_line(imgui.get_window_width() - self.app.button_w)
+                    if self.combined_layers[i] == "X":
+                        if imgui.button(f"Recover##{i}"):
+                            # find last entry in l1 or l2 that has the same resolution as resolution and copy all the layers from self.cached to self.combined up to that point
+                            for j, (l1, l2) in enumerate(zip(layer1, layer2)):
+                                res1 = 0
+                                res2 = 0
+                                if l1:
+                                    res1 = int(re.search(r'\d+', l1).group())
+                                if l2:
+                                    res2 = int(re.search(r'\d+', l2).group())
+                                if res1 == resolution * 2 or res2 == resolution * 2:
+                                    self.combined_layers[:j] = copy.deepcopy(self.cached_layers[:j])
+                                    break
+                                # deal with the last resolution
+                                if j == len(layer1) - 1:
+                                    self.combined_layers = copy.deepcopy(self.cached_layers)
+<<<<<<< HEAD
+                        imgui.same_line()
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
+                    else:
+                        if imgui.button(f"X##{i}"):
+                            self.cached_layers[:i] = copy.deepcopy(self.combined_layers[:i])
+                            self.combined_layers[i] = "X"
+                            self.combined_layers[i + 1:] = ["X"] * (len(self.combined_layers) - i - 1)
+<<<<<<< HEAD
+                        imgui.same_line()
+=======
+>>>>>>> 9775bae (Initial commit with code only (no model files))
+                    for it, (l1t, l2t) in enumerate(zip(layer1, layer2)):
+                        l1t_res = 0
+                        l2t_res = 0
+                        if l1t:
+                            l1t_res = int(re.search(r'\d+', l1t).group())
+                        if l2t:
+                            l2t_res = int(re.search(r'\d+', l2t).group())
+                        if l1t_res == resolution or l2t_res == resolution:
+                            imgui.text(l1t if l1t else l2t)
+                            imgui.same_line(imgui.get_content_region_available_width() // 3)
+                            with imgui_utils.grayed_out(l1t == '' or self.combined_layers[it] == "X"):
+                                clicked, _ = imgui.checkbox(f"##layer1{i}{it}", self.combined_layers[it] == "A")
+                            if clicked and l1t != '' and not (self.combined_layers[it] == "X"):
+                                print("clicked1")
+                                self.combined_layers[it] = "A"
+                            imgui.same_line(imgui.get_content_region_available_width() // 3 * 2)
+                            with imgui_utils.grayed_out(l2t == '' or self.combined_layers[it] == "X"):
+                                clicked, _ = imgui.checkbox(f"##layer2{i}{it}", self.combined_layers[it] == "B")
+                            if clicked and l2t != '' and not (self.combined_layers[it] == "X"):
+                                print("clicked2")
+                                self.combined_layers[it] = "B"
 
-            with imgui_utils.grayed_out(l1 == '' or ckb_display == "X"):
-                clicked, _ = imgui.checkbox(f"##layer1{i}", ckb_display == "A" or ckb_display == "Mixed")
-            if clicked and l1 and ckb_display != "X":
-                self.combined_layers[i] = "A"
-                for j in range(i + 1, len(self.combined_layers)):
-                    if layer1[j]:
-                        r = int(re.search(r'\d+', layer1[j]).group())
-                        if r == resolution:
-                            self.combined_layers[j] = "A"
-            imgui.next_column()
-            with imgui_utils.grayed_out(l2 == '' or ckb_display == "X"):
-                clicked, _ = imgui.checkbox(f"##layer2{i}", ckb_display == "B" or ckb_display == "Mixed")
-            if clicked and l2 and ckb_display != "X":
-                self.combined_layers[i] = "B"
-                for j in range(i + 1, len(self.combined_layers)):
-                    if layer2[j]:
-                        r = int(re.search(r'\d+', layer2[j]).group())
-                        if r == resolution:
-                            self.combined_layers[j] = "B"
-            imgui.next_column()
-            if self.combined_layers[i] == "X":
-                if imgui.button(f"Recover##{i}"):
-                    do_recover(resolution)
-            else:
-                if imgui.button(f"X##{i}"):
-                    self.cached_layers[:i] = copy.deepcopy(self.combined_layers[:i])
-                    self.combined_layers[i] = "X"
-                    self.combined_layers[i + 1:] = ["X"] * (len(self.combined_layers) - i - 1)
-            imgui.next_column()
-
-            if self.collapsed[i] == "v":
-                for it, (l1t, l2t) in enumerate(zip(layer1, layer2)):
-                    r1 = int(re.search(r'\d+', l1t).group()) if l1t else 0
-                    r2 = int(re.search(r'\d+', l2t).group()) if l2t else 0
-                    if r1 != resolution and r2 != resolution:
-                        continue
-                    imgui.text(l1t if l1t else l2t)
-                    imgui.next_column()
-                    with imgui_utils.grayed_out(l1t == '' or self.combined_layers[it] == "X"):
-                        clicked, _ = imgui.checkbox(f"##layer1{i}{it}", self.combined_layers[it] == "A")
-                    if clicked and l1t and self.combined_layers[it] != "X":
-                        self.combined_layers[it] = "A"
-                    imgui.next_column()
-                    with imgui_utils.grayed_out(l2t == '' or self.combined_layers[it] == "X"):
-                        clicked, _ = imgui.checkbox(f"##layer2{i}{it}", self.combined_layers[it] == "B")
-                    if clicked and l2t and self.combined_layers[it] != "X":
-                        self.combined_layers[it] = "B"
-                    imgui.next_column()
-                    imgui.next_column()
-
-            imgui.columns(1)
-            imgui.end_child()
-            res_exp += 1
+                imgui.end_child()
+                res_exp += 1
         imgui.end_group()
 
     def combine_models(self):
