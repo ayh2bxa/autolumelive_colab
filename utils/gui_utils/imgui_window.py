@@ -7,15 +7,10 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 import os
-<<<<<<< HEAD
-import imgui
-import imgui.integrations.glfw
-=======
 import sys
 import imgui
 import imgui.integrations.glfw
 import imgui.integrations.opengl
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
 from . import glfw_window
 from . import imgui_utils
@@ -97,14 +92,6 @@ class ImguiWindow(glfw_window.GlfwWindow):
         super().end_frame()
 
 #----------------------------------------------------------------------------
-<<<<<<< HEAD
-# Wrapper class for GlfwRenderer to fix a mouse wheel bug on Linux.
-
-class _GlfwRenderer(imgui.integrations.glfw.GlfwRenderer):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.mouse_wheel_multiplier = 1
-=======
 # Wrapper class to use FixedPipelineRenderer on macOS due to OpenGL limitations
 
 class _GlfwRenderer(imgui.integrations.opengl.FixedPipelineRenderer):
@@ -121,13 +108,10 @@ class _GlfwRenderer(imgui.integrations.opengl.FixedPipelineRenderer):
     def keyboard_callback(self, window, key, scancode, action, mods):
         # Handle keyboard input for imgui
         pass
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
     def scroll_callback(self, window, x_offset, y_offset):
         self.io.mouse_wheel += y_offset * self.mouse_wheel_multiplier
 
-<<<<<<< HEAD
-=======
     def _map_keys(self):
         # Map GLFW keys to imgui keys
         import glfw
@@ -177,5 +161,4 @@ class _GlfwRenderer(imgui.integrations.opengl.FixedPipelineRenderer):
         io.mouse_down[1] = glfw.get_mouse_button(self.window, glfw.MOUSE_BUTTON_RIGHT)
         io.mouse_down[2] = glfw.get_mouse_button(self.window, glfw.MOUSE_BUTTON_MIDDLE)
 
->>>>>>> 9775bae (Initial commit with code only (no model files))
 #----------------------------------------------------------------------------

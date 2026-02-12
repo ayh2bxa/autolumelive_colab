@@ -10,10 +10,6 @@ import click
 import cv2
 import imgui
 import numpy as np
-<<<<<<< HEAD
-import webbrowser
-=======
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
 from assets import RED, GREEN, OPAQUEGREEN
 from utils.gui_utils import imgui_window, gl_utils
@@ -30,10 +26,7 @@ from modules.super_res_module import SuperResModule
 class Menu:
     def __init__(self, app):
         self.app = app
-<<<<<<< HEAD
-=======
         self.show_help = False
->>>>>>> 9775bae (Initial commit with code only (no model files))
         self.pca = PCA_Module(self)
         self.training = TrainingModule(self)
         self.compress = CompressModule(self)
@@ -69,20 +62,6 @@ class Menu:
 
         metacreation_height = logo_height
         metacreation_width = int(metacreation_height * (self.metacreation.shape[1] / self.metacreation.shape[0]))
-<<<<<<< HEAD
-
-        doc_button_width = 160
-        doc_button_height = int(self.menu_height * 0.6)  
-        doc_button_y = (self.menu_height - doc_button_height) / 2  
-        
-        imgui.same_line(self.app.content_width - (metacreation_width + doc_button_width + 40))
-        imgui.set_cursor_pos_y(doc_button_y)
-        
-        imgui.push_style_var(imgui.STYLE_FRAME_PADDING, (0, doc_button_height * 0.2))
-        if imgui_utils.button("Documentation", 
-                            width=doc_button_width):
-            webbrowser.open("https://docs.google.com/document/d/1KJ3z55UNcuMitlDw6fhRDsd1YHVWqGeT0Fe0Ndy866I/edit?tab=t.0#heading=h.n1zhagy37lt")
-=======
         
         help_button_width = 150
         help_button_height = int(self.menu_height * 0.6)  
@@ -95,7 +74,6 @@ class Menu:
         if imgui_utils.button("Help On" if not self.show_help else "Help Off", 
                             width=help_button_width):
             self.show_help = not self.show_help
->>>>>>> 9775bae (Initial commit with code only (no model files))
         imgui.pop_style_var()
 
         imgui.same_line(self.app.content_width - (metacreation_width + 20))

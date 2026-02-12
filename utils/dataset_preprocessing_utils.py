@@ -5,10 +5,7 @@ import numpy as np
 import cv2
 import PIL.Image
 import PIL.ImageOps
-<<<<<<< HEAD
-=======
 import subprocess
->>>>>>> 9775bae (Initial commit with code only (no model files))
 import torchvision.transforms as transforms
 import ffmpeg
 
@@ -34,46 +31,6 @@ class DatasetPreprocessingUtils:
 
 
     def load_images(self, image_path):
-<<<<<<< HEAD
-        """Load image, normalize color space to RGB, and handle EXIF orientation."""
-        pil_image = None
-        if isinstance(image_path, str):
-            pil_image = PIL.Image.open(image_path)
-            pil_image = PIL.ImageOps.exif_transpose(pil_image)
-        elif isinstance(image_path, PIL.Image.Image):
-            pil_image = image_path
-        else:
-            image = image_path
-            if not isinstance(image, np.ndarray):
-                raise TypeError("load_images expects path, PIL.Image, or numpy.ndarray")
-            if image.ndim == 2:
-                pil_image = PIL.Image.fromarray(image, mode='L')
-            elif image.ndim == 3:
-                channels = image.shape[2]
-                if channels >= 3:
-                    pil_image = PIL.Image.fromarray(image[:, :, :3])
-                elif channels == 1:
-                    pil_image = PIL.Image.fromarray(image[:, :, 0], mode='L')
-                else:
-                    raise ValueError(f"Unsupported image format: shape={image.shape}")
-            else:
-                raise ValueError(f"Unexpected image format: shape={image.shape}")
-
-        if pil_image.mode == 'P':
-            pil_image = pil_image.convert('RGB')
-
-        image = np.array(pil_image)
-        if image.ndim == 2:
-            image = np.repeat(image[:, :, np.newaxis], 3, axis=2)
-        elif image.ndim == 3:
-            if image.shape[2] == 4 or image.shape[2] > 3:
-                image = image[:, :, :3]
-
-        pil_image = PIL.Image.fromarray(image)
-        pil_image = pil_image.convert('RGB')
-        image = np.array(pil_image)
-
-=======
         """Load image with color space handling and EXIF orientationfor dataset processing."""
         if isinstance(image_path, str):
             pil_image = PIL.Image.open(image_path)
@@ -148,7 +105,6 @@ class DatasetPreprocessingUtils:
             # Convert back to numpy array
             image = np.array(pil_image)
         
->>>>>>> 9775bae (Initial commit with code only (no model files))
         return image
 
     @staticmethod
@@ -201,8 +157,6 @@ class DatasetPreprocessingUtils:
             augmented_images.append(yflipped_image)
         
         return augmented_images
-<<<<<<< HEAD
-=======
     
     @staticmethod
     def get_video_fps(video_path):
@@ -213,53 +167,14 @@ class DatasetPreprocessingUtils:
         video_fps = fps_num / fps_den if fps_den != 0 else 0
         
         return video_fps
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
     @staticmethod
     def calculate_expected_video_frames(video_path, fps=10):
         probe = ffmpeg.probe(video_path)
         video_info = next(s for s in probe['streams'] if s['codec_type'] == 'video')
 
-<<<<<<< HEAD
-        duration = None
-        
-        if 'duration' in video_info and video_info['duration']:
-            try:
-                duration = float(video_info['duration'])
-            except (ValueError, TypeError):
-                pass
-        
-        if duration is None and 'tags' in video_info:
-            tags = video_info['tags']
-            if 'DURATION' in tags:
-                try:
-                    time_str = tags['DURATION']
-                    parts = time_str.split(':')
-                    if len(parts) == 3:
-                        hours = float(parts[0])
-                        minutes = float(parts[1])
-                        seconds = float(parts[2])
-                        duration = hours * 3600 + minutes * 60 + seconds
-                except (ValueError, TypeError, IndexError):
-                    pass
-        
-        if duration is None and 'format' in probe:
-            format_info = probe['format']
-            if 'duration' in format_info and format_info['duration']:
-                try:
-                    duration = float(format_info['duration'])
-                except (ValueError, TypeError):
-                    pass
-        
-        if duration is None:
-            print(f"Warning: Could not determine duration for video {video_path}, using default estimate")
-            duration = 0
-        
-        expected_frames = int(duration * fps) if duration > 0 else 0
-=======
         duration = float(video_info['duration'])
         expected_frames = int(duration * fps)
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
         return expected_frames
 
@@ -295,15 +210,6 @@ class DatasetPreprocessingUtils:
             save_path.mkdir(parents=True, exist_ok=True)
 
             output_pattern = str(save_path / f"{video_name}_frame_%05d.jpg")
-<<<<<<< HEAD
-            try:
-                ffmpeg.input(video_path).output(output_pattern, vf=f"fps={fps}").run()
-                results.append(str(save_path))
-            except ffmpeg.Error as e:
-                print(f"FFmpeg failed for {video_path}: {e}")
-                continue
-
-=======
             cmd = [
                 "ffmpeg",
                 "-i", video_path,
@@ -319,7 +225,6 @@ class DatasetPreprocessingUtils:
                 continue
         
         # Send completion signal
->>>>>>> 9775bae (Initial commit with code only (no model files))
         queue_out.put({'type': 'completed', 'results': results})
     
     @staticmethod
@@ -327,10 +232,7 @@ class DatasetPreprocessingUtils:
         target_size = settings.size
         resize_mode = settings.resizeMode
         
-<<<<<<< HEAD
-=======
         # Handle non-square settings
->>>>>>> 9775bae (Initial commit with code only (no model files))
         if hasattr(settings, 'nonSquare') and settings.nonSquare:
             image = DatasetPreprocessingUtils.non_square(image, settings)
         else:
@@ -352,10 +254,7 @@ class DatasetPreprocessingUtils:
     @staticmethod
     def non_square(image, settings):
         """Process image with non-square aspect ratio and padding to square"""
-<<<<<<< HEAD
-=======
         # Extract settings
->>>>>>> 9775bae (Initial commit with code only (no model files))
         target_size = settings.size
         resize_mode = settings.resizeMode
         width_ratio = settings.nonSquareSettings["widthRatio"]
@@ -437,10 +336,7 @@ class DatasetPreprocessingUtils:
         augmentationSettings = settings.augmentationSettings
         output_path = settings.output_path
         
-<<<<<<< HEAD
-=======
         # Create output (data) directory if it doesn't exist
->>>>>>> 9775bae (Initial commit with code only (no model files))
         os.makedirs(output_path, exist_ok=True)
         
         # Debug print settings
@@ -457,23 +353,6 @@ class DatasetPreprocessingUtils:
         print(f"Y-Flip Augmentation: {augmentationSettings['yFlip']}")
         print("=====================================")
         
-<<<<<<< HEAD
-        processed_count = 0
-        total_source_images = len(images)
-        utils = DatasetPreprocessingUtils()
-        
-        num_augmentations = sum(1 for v in augmentationSettings.values() if v)
-        total_images = total_source_images * (1 + num_augmentations)
-        
-        # Update progress more frequently for better responsiveness
-        update_interval = max(1, min(10, total_images // 500))
-        
-        for i, image_path in enumerate(images):
-            try:
-                if not queue.empty():
-                    try:
-                        if queue.get_nowait() == 'cancel':
-=======
         # Process each image
         processed_count = 0
         total_images = len(images)
@@ -486,7 +365,6 @@ class DatasetPreprocessingUtils:
                     try:
                         signal = queue.get_nowait()
                         if signal == 'cancel':
->>>>>>> 9775bae (Initial commit with code only (no model files))
                             print("Batch preprocessing cancelled by user")
                             reply.put(['Batch preprocessing cancelled', True])
                             return None
@@ -495,16 +373,6 @@ class DatasetPreprocessingUtils:
                 
                 image = utils.load_images(image_path)
                 
-<<<<<<< HEAD
-                images_to_process = [image]
-                if any(settings.augmentationSettings.values()): 
-                    images_to_process.extend(utils.augment_image(image, settings))
-                
-                for img_idx, img_to_process in enumerate(images_to_process):
-                    if not queue.empty():
-                        try:
-                            if queue.get_nowait() == 'cancel':
-=======
                 # PIPELINE: Augmentation → Non-square → Resize
                 
                 # Create list of images to process (original + augmented versions)
@@ -522,7 +390,6 @@ class DatasetPreprocessingUtils:
                         try:
                             signal = queue.get_nowait()
                             if signal == 'cancel':
->>>>>>> 9775bae (Initial commit with code only (no model files))
                                 print("Batch preprocessing cancelled by user")
                                 reply.put(['Batch preprocessing cancelled', True])
                                 return None
@@ -530,22 +397,6 @@ class DatasetPreprocessingUtils:
                             pass
                     
                     processed_image = utils.resize_image_np(img_to_process, settings)
-<<<<<<< HEAD
-                    output_filename = f"image_{i:05d}.png" if img_idx == 0 else f"image_{i:05d}_augmented{img_idx}.png"
-                    output_filepath = Path(output_path) / output_filename
-                    PIL.Image.fromarray(processed_image).save(str(output_filepath), 'PNG', compress_level=1)
-                    
-                    processed_count += 1
-                    
-                    if processed_count % update_interval == 0 or processed_count == total_images:
-                        reply.put({
-                            'type': 'progress',
-                            'current': processed_count,
-                            'total': total_images,
-                            'percentage': (processed_count / total_images * 100) if total_images > 0 else 0,
-                            'current_file': Path(image_path).name
-                        })
-=======
                     
                     if img_idx == 0:
                         output_filename = f"image_{i:05d}.png"
@@ -571,7 +422,6 @@ class DatasetPreprocessingUtils:
                 
                 if (i + 1) % 100 == 0:
                     print(f"Processed {i + 1}/{len(images)} images...")
->>>>>>> 9775bae (Initial commit with code only (no model files))
                     
             except Exception as e:
                 print(f"Error processing image {i}: {str(e)}")
@@ -579,10 +429,7 @@ class DatasetPreprocessingUtils:
         
         print(f"Dataset processing completed. {processed_count} images processed and saved to {output_path}")
 
-<<<<<<< HEAD
-=======
         # Send completion signal
->>>>>>> 9775bae (Initial commit with code only (no model files))
         completion_data = {
             'type': 'completed',
             'processed_count': processed_count,

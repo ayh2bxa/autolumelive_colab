@@ -1,18 +1,8 @@
-<<<<<<< HEAD
-import tkinter as tk
-from tkinter import filedialog
-=======
->>>>>>> 9775bae (Initial commit with code only (no model files))
 import os
 from typing import List, Optional, Tuple
 
 class NativeBrowserWidget:
     def __init__(self):
-<<<<<<< HEAD
-        # Hide main tkinter window
-        self.root = tk.Tk()
-        self.root.withdraw()
-=======
         # Disable tkinter on macOS due to compatibility issues
         self.root = None
         self._tkinter_available = False
@@ -20,7 +10,6 @@ class NativeBrowserWidget:
         self._filedialog = None
         print("Warning: tkinter disabled on macOS, file dialogs will use alternative methods")
         return
->>>>>>> 9775bae (Initial commit with code only (no model files))
         
         # Configure tkinter for better performance with large directories
         self.root.option_add('*Dialog.msg.font', 'TkDefaultFont')
@@ -40,20 +29,12 @@ class NativeBrowserWidget:
         
         # Image extensions 
         self.image_extensions = [
-<<<<<<< HEAD
-            ('Image files', '*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.gif'),
-=======
             ('Image files', '*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.heic'),
->>>>>>> 9775bae (Initial commit with code only (no model files))
             ('PNG files', '*.png'),
             ('JPEG files', '*.jpg *.jpeg'),
             ('BMP files', '*.bmp'),
             ('TIFF files', '*.tiff *.tif'),
             ('WebP files', '*.webp'),
-<<<<<<< HEAD
-            ('GIF files', '*.gif'),
-=======
->>>>>>> 9775bae (Initial commit with code only (no model files))
             ('All files', '*.*')
         ]
         
@@ -65,16 +46,6 @@ class NativeBrowserWidget:
             ('MOV files', '*.mov'),
             ('MKV files', '*.mkv'),
             ('WebM files', '*.webm'),
-<<<<<<< HEAD
-            ('GIF files', '*.gif'),
-            ('All files', '*.*')
-        ]
-        
-        self.all_media_extensions = [
-            ('Media files', '*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.gif *.mp4 *.avi *.mov *.mkv *.webm'),
-            ('Image files', '*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.webp *.gif'),
-            ('Video files', '*.mp4 *.avi *.mov *.mkv *.webm *.gif'),
-=======
             ('GIF files', '*.gif')
         ]
         
@@ -82,7 +53,6 @@ class NativeBrowserWidget:
             ('Media files', '*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.gif *.webp *.mp4 *.avi *.mov *.mkv *.wmv *.flv *.webm *.m4v *.3gp'),
             ('Image files', '*.png *.jpg *.jpeg *.bmp *.tiff *.tif *.gif *.webp'),
             ('Video files', '*.mp4 *.avi *.mov *.mkv *.wmv *.flv *.webm *.m4v *.3gp'),
->>>>>>> 9775bae (Initial commit with code only (no model files))
             ('All files', '*.*')
         ]
         
@@ -144,14 +114,10 @@ class NativeBrowserWidget:
     
     def select_image_directory(self):
         """Select a directory containing image files - returns directory path only for lazy loading."""
-<<<<<<< HEAD
-        folder_path = filedialog.askdirectory(
-=======
         if not self._tkinter_available:
             print("Error: tkinter not available")
             return None
         folder_path = self._filedialog.askdirectory(
->>>>>>> 9775bae (Initial commit with code only (no model files))
             title="Select a folder containing image dataset"
         )
         
@@ -195,20 +161,6 @@ class NativeBrowserWidget:
     
     def select_image_files_native(self):
         """Select multiple image files using native OS dialog with enhanced performance."""
-<<<<<<< HEAD
-        try:
-            # Configure tkinter for better performance with large directories
-            self.root.update_idletasks()
-            
-            # Set tkinter options for better performance with large directories
-            self.root.tk.call('tk', 'appname', 'ImageSelector')
-            
-            # Use native dialog with performance optimizations
-            # Set initial directory to avoid scanning huge directories by default
-            initial_dir = os.getcwd()
-            
-            image_files = filedialog.askopenfilenames(
-=======
         if not self._tkinter_available:
             print("Error: tkinter not available")
             return []
@@ -224,17 +176,12 @@ class NativeBrowserWidget:
             initial_dir = os.getcwd()
 
             image_files = self._filedialog.askopenfilenames(
->>>>>>> 9775bae (Initial commit with code only (no model files))
                 title="Select Image Files",
                 filetypes=self.image_extensions,
                 initialdir=initial_dir
             )
             return list(image_files)
-<<<<<<< HEAD
-            
-=======
 
->>>>>>> 9775bae (Initial commit with code only (no model files))
         except Exception as e:
             print(f"Native dialog failed: {e}")
             return []
@@ -246,20 +193,6 @@ class NativeBrowserWidget:
 
     def select_video_files(self):
         """Select one or more video files using native OS dialog with enhanced performance."""
-<<<<<<< HEAD
-        try:
-            # Configure tkinter for better performance with large directories
-            self.root.update_idletasks()
-            
-            # Set tkinter options for better performance with large directories
-            self.root.tk.call('tk', 'appname', 'VideoSelector')
-            
-            # Use native dialog with performance optimizations
-            # Set initial directory to avoid scanning huge directories by default
-            initial_dir = os.getcwd()
-            
-            video_files = filedialog.askopenfilenames(
-=======
         if not self._tkinter_available:
             print("Error: tkinter not available")
             return []
@@ -275,31 +208,22 @@ class NativeBrowserWidget:
             initial_dir = os.getcwd()
 
             video_files = self._filedialog.askopenfilenames(
->>>>>>> 9775bae (Initial commit with code only (no model files))
                 title="Select Video Files",
                 filetypes=self.video_extensions,
                 initialdir=initial_dir
             )
             return list(video_files)
-<<<<<<< HEAD
-            
-=======
 
->>>>>>> 9775bae (Initial commit with code only (no model files))
         except Exception as e:
             print(f"Native video dialog failed: {e}")
             return []
     
     def select_video_directory(self):
         """Select a directory containing video files - returns directory path only for lazy loading."""
-<<<<<<< HEAD
-        folder_path = filedialog.askdirectory(
-=======
         if not self._tkinter_available:
             print("Error: tkinter not available")
             return None
         folder_path = self._filedialog.askdirectory(
->>>>>>> 9775bae (Initial commit with code only (no model files))
             title="Select a folder containing video dataset"
         )
         
@@ -347,27 +271,13 @@ class NativeBrowserWidget:
         Select a directory using native OS dialog.
         Returns the directory path or None if cancelled.
         """
-<<<<<<< HEAD
-=======
         if not self._tkinter_available:
             print("Error: tkinter not available")
             return None
->>>>>>> 9775bae (Initial commit with code only (no model files))
         try:
             # Configure tkinter for better performance
             self.root.update_idletasks()
             self.root.tk.call('tk', 'appname', 'DirectorySelector')
-<<<<<<< HEAD
-            
-            # Use askdirectory to select a directory
-            directory_path = filedialog.askdirectory(
-                title=title,
-                initialdir=os.getcwd()
-            )
-            
-            return directory_path if directory_path else None
-            
-=======
 
             # Use askdirectory to select a directory
             directory_path = self._filedialog.askdirectory(
@@ -377,7 +287,6 @@ class NativeBrowserWidget:
 
             return directory_path if directory_path else None
 
->>>>>>> 9775bae (Initial commit with code only (no model files))
         except Exception as e:
             print(f"Error in select_directory: {e}")
             return None
@@ -387,25 +296,16 @@ class NativeBrowserWidget:
         Select a directory and check if it contains video files.
         Returns (directory_path, has_video_files, video_files_list)
         """
-<<<<<<< HEAD
-=======
         if not self._tkinter_available:
             print("Error: tkinter not available")
             return None, False, []
->>>>>>> 9775bae (Initial commit with code only (no model files))
         try:
             # Configure tkinter for better performance
             self.root.update_idletasks()
             self.root.tk.call('tk', 'appname', 'DirectorySelector')
-<<<<<<< HEAD
-            
-            # Use askdirectory to select a directory
-            directory_path = filedialog.askdirectory(
-=======
 
             # Use askdirectory to select a directory
             directory_path = self._filedialog.askdirectory(
->>>>>>> 9775bae (Initial commit with code only (no model files))
                 title=title,
                 initialdir=os.getcwd()
             )

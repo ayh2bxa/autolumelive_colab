@@ -13,11 +13,7 @@ import glob
 import os
 import re
 import pandas as pd
-<<<<<<< HEAD
-from widgets.help_icon_widget import HelpIconWidget
-=======
 
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
 def _locate_results(pattern):
     return pattern
@@ -34,29 +30,6 @@ def extract_mapping_names(model):
 
 
 def load_help_texts():
-<<<<<<< HEAD
-    help_texts = {}
-    help_urls = {}
-    
-    try:
-        csv_path = os.path.join(os.path.dirname(__file__), "help_texts.csv")
-        if os.path.exists(csv_path):
-            df = pd.read_csv(csv_path)
-            if 'module' in df.columns:
-                df = df[df['module'] == 'network_mixing']
-            for _, row in df.iterrows():
-                if row.get('key') and row.get('text'):
-                    key = str(row['key']).strip()
-                    text = str(row['text'])
-                    text = text.replace('\\n', '\n')
-                    help_texts[key] = text
-                    if pd.notna(row.get('url')) and str(row['url']).strip():
-                        help_urls[key] = str(row['url']).strip()
-    except Exception as e:
-        print(f"Error loading network mixing help texts from CSV. Error: {e}")
-    
-    return help_texts, help_urls
-=======
     default_texts = {
         "model1_network_mixing": "First model to mix from",
         "model2_network_mixing": "Second model to mix from",
@@ -80,7 +53,6 @@ def load_help_texts():
         print(f"Warning: Using default network mixing help texts. Error: {e}")
     
     return default_texts
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
 
 class MixingModule:
@@ -104,12 +76,7 @@ class MixingModule:
         self.combined_layers = []
         self.collapsed = []
         self.cached_layers = []
-<<<<<<< HEAD
-        self.help_texts, self.help_urls = load_help_texts()
-        self.help_icon = HelpIconWidget()
-=======
         self.help_texts = load_help_texts()
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
         for pkl in os.listdir("./models"):
             if pkl.endswith(".pkl"):
@@ -168,33 +135,18 @@ class MixingModule:
             self.pkl2 = net
             self.data2 = data
 
-<<<<<<< HEAD
-    def model_selection_gui(self, title, m=1, input_width=None):
-        imgui.begin_group()
-        imgui.text(title)
-
-=======
     def model_selection_gui(self, title, m=1):
         imgui.begin_group()
         imgui.text(title)
         imgui.separator()
->>>>>>> 9775bae (Initial commit with code only (no model files))
         if m == 1:
             model = self.model1
         else:
             model = self.model2
-<<<<<<< HEAD
-
-        changed, model = imgui_utils.input_text(f'##surgery{m}', model, 1024,
-                                                flags=(
-                                                        imgui.INPUT_TEXT_AUTO_SELECT_ALL | imgui.INPUT_TEXT_ENTER_RETURNS_TRUE),
-                                                width=input_width if input_width is not None else imgui.get_content_region_available_width()/2,
-=======
         changed, model = imgui_utils.input_text(f'##surgery{m}', model, 1024,
                                                 flags=(
                                                         imgui.INPUT_TEXT_AUTO_SELECT_ALL | imgui.INPUT_TEXT_ENTER_RETURNS_TRUE),
                                                 width=(100),
->>>>>>> 9775bae (Initial commit with code only (no model files))
                                                 help_text='<PATH> | <URL> | <RUN_DIR> | <RUN_ID> | <RUN_ID>/<KIMG>.pkl')
         if changed:
             if m == 1:
@@ -271,25 +223,6 @@ class MixingModule:
         spacing = self.app.spacing
         input_width = -(button_width + spacing + help_width + 30)
 
-<<<<<<< HEAD
-        imgui.begin_group()
-        imgui.text("Mix two models together")
-        imgui.same_line()
-        imgui.dummy(imgui.get_content_region_available_width()/2 - imgui.calc_text_size("Mix two models together").x, 0)
-        self.help_icon.render_with_url(self.help_texts.get("network_mixing_module"), self.help_urls.get("network_mixing_module"), "Read More")
-        imgui.end_group()
-
-        imgui.separator()
-
-        button_width = self.app.button_w
-        spacing = self.app.spacing
-        available_width = imgui.get_content_region_available_width()
-        input_width = (available_width - 2 * button_width - spacing) / 2.1
-
-        self.model_selection_gui("Model 1", 1, input_width)
-        imgui.same_line()
-        self.model_selection_gui("Model 2", 2, input_width)
-=======
         # imgui.begin_group()
         # imgui.text("Combine two models into one")
         # imgui.same_line()
@@ -312,7 +245,6 @@ class MixingModule:
         self.model_selection_gui("Model 2", 2)
         if self.menu.show_help and imgui.is_item_hovered():
             imgui.set_tooltip(self.help_texts.get("model2_network_mixing", "Select second model"))
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
         if imgui_utils.button("Combine", enabled=self.pkl1 and self.pkl2,
                               width=imgui.get_content_region_available_width()):
@@ -350,11 +282,8 @@ class MixingModule:
                                                         help_text="Name of the output model",
                                                         width=input_width,
                                                         flags=(imgui.INPUT_TEXT_AUTO_SELECT_ALL))
-<<<<<<< HEAD
-=======
             if self.menu.show_help and imgui.is_item_hovered():
                 imgui.set_tooltip(self.help_texts.get("output_name_network_mixing", "Enter output model name"))
->>>>>>> 9775bae (Initial commit with code only (no model files))
             imgui.same_line()
             imgui.text(".pkl")
             imgui.same_line()
@@ -374,11 +303,6 @@ class MixingModule:
         imgui.begin_group()
         imgui.set_cursor_pos((imgui.get_content_region_available_width() // 3 - help_width, imgui.get_cursor_pos()[1]))
         imgui.text(os.path.basename(self.model1))
-<<<<<<< HEAD
-        
-        imgui.same_line(imgui.get_content_region_available_width() // 3 * 2 - help_width)
-        imgui.text(os.path.basename(self.model2))
-=======
         if self.menu.show_help and imgui.is_item_hovered():
             imgui.set_tooltip(self.help_texts.get("model_selection_network_mixing", "Select layers from first model"))
         
@@ -386,7 +310,6 @@ class MixingModule:
         imgui.text(os.path.basename(self.model2))
         if self.menu.show_help and imgui.is_item_hovered():
             imgui.set_tooltip(self.help_texts.get("model_selection_network_mixing", "Select layers from second model"))
->>>>>>> 9775bae (Initial commit with code only (no model files))
         
         imgui.separator()
         # 在分辨率组标题中添加帮助标记
@@ -415,11 +338,8 @@ class MixingModule:
                 if imgui.is_item_clicked():
                     self.collapsed[i] = ">" if self.collapsed[i] == "v" else "v"
 
-<<<<<<< HEAD
-=======
                 if self.menu.show_help and imgui.is_item_hovered():
                     imgui.set_tooltip(self.help_texts.get("resolution_layers_network_mixing", f"Layers at {resolution}x{resolution} resolution"))
->>>>>>> 9775bae (Initial commit with code only (no model files))
 
                 if self.collapsed[i] == ">":
                     imgui.same_line(imgui.get_content_region_available_width() // 3 - help_width)
@@ -485,23 +405,15 @@ class MixingModule:
                                 # deal with the last resolution
                                 if j == len(layer1) - 1:
                                     self.combined_layers = copy.deepcopy(self.cached_layers)
-<<<<<<< HEAD
-                        imgui.same_line()
-=======
                         if self.menu.show_help and imgui.is_item_hovered():
                             imgui.set_tooltip(self.help_texts.get("recover_network_mixing", "Restore previous settings"))
->>>>>>> 9775bae (Initial commit with code only (no model files))
                     else:
                         if imgui.button(f"X##{i}"):
                             self.cached_layers[:i] = copy.deepcopy(self.combined_layers[:i])
                             self.combined_layers[i] = "X"
                             self.combined_layers[i + 1:] = ["X"] * (len(self.combined_layers) - i - 1)
-<<<<<<< HEAD
-                        imgui.same_line()
-=======
                         if self.menu.show_help and imgui.is_item_hovered():
                             imgui.set_tooltip(self.help_texts.get("disable_network_mixing", "Disable from this point"))
->>>>>>> 9775bae (Initial commit with code only (no model files))
                 else:
                     imgui.same_line(imgui.get_window_width() - self.app.button_w)
                     if self.combined_layers[i] == "X":
@@ -520,19 +432,11 @@ class MixingModule:
                                 # deal with the last resolution
                                 if j == len(layer1) - 1:
                                     self.combined_layers = copy.deepcopy(self.cached_layers)
-<<<<<<< HEAD
-                        imgui.same_line()
-=======
->>>>>>> 9775bae (Initial commit with code only (no model files))
                     else:
                         if imgui.button(f"X##{i}"):
                             self.cached_layers[:i] = copy.deepcopy(self.combined_layers[:i])
                             self.combined_layers[i] = "X"
                             self.combined_layers[i + 1:] = ["X"] * (len(self.combined_layers) - i - 1)
-<<<<<<< HEAD
-                        imgui.same_line()
-=======
->>>>>>> 9775bae (Initial commit with code only (no model files))
                     for it, (l1t, l2t) in enumerate(zip(layer1, layer2)):
                         l1t_res = 0
                         l2t_res = 0
