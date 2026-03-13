@@ -9,10 +9,14 @@ import torch
 from modules.autolume_live import Autolume
 
 
+if getattr(sys, "frozen", False):
+    os.chdir(os.path.dirname(sys.executable))
+
+
 def get_runtime_bin_dir():
     # PyInstaller frozen app
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-        return sys._MEIPASS
+        return os.path.join(sys._MEIPASS, "bin")
 
     # Development mode
     base = os.path.dirname(os.path.abspath(__file__))
