@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch_utils.device_utils import get_default_device
 from tqdm import tqdm
 import numpy as np
 from torch.nn import functional as f
@@ -248,13 +249,7 @@ def process(args, file, device='cuda'):
 
 # file loop
 def main(args):
-  # Auto-detect best available device
-  if torch.cuda.is_available():
-    device = 'cuda'
-  elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-    device = 'mps'
-  else:
-    device = 'cpu'
+  device = get_default_device()
   print(f"Using device: {device}")
 
   list_file=args.input_path

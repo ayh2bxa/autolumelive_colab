@@ -5,6 +5,7 @@ import cv2
 import imgui
 import torch
 from torchvision import transforms
+from torch_utils.device_utils import get_default_device
 import torchvision.transforms.functional as F
 import numpy as np
 
@@ -81,13 +82,7 @@ class SuperResModule:
         self.video_width = 0
         self.video_height = 0
         self.help_texts = load_help_texts()
-        # Auto-detect best available device
-        if torch.cuda.is_available():
-            self.device = 'cuda'
-        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-            self.device = 'mps'
-        else:
-            self.device = 'cpu'
+        self.device = get_default_device()
 
 
     def display_progress(self):

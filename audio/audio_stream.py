@@ -107,12 +107,14 @@ class AudioStream(object):
                 rate = int(self.info["defaultSampleRate"])
 
             stream = self.pa.open(
-                format=pyaudio.paInt16,
+                format=pyaudio.paFloat32,
                 channels=1,
                 input_device_index=device,
                 frames_per_buffer=self.update_window_n_frames,
                 rate=rate,
                 input=True)
+            stream.start_stream()
+            stream.stop_stream()
             stream.close()
             return True
         except Exception as e:
@@ -132,6 +134,10 @@ class AudioStream(object):
         if len(mics) == 0:
             print("No working microphone devices found!")
             raise NoMicrophoneError("No working microphone devices found")
+
+        # Prefer pure-input devices (maxOutputChannels == 0) — virtual/aggregate
+        # devices like BlackHole can segfault with callback-based streams
+        mics.sort(key=lambda d: self.pa.get_device_info_by_index(d)["maxOutputChannels"] != 0)
 
         print("Found %d working microphone device(s): " % len(mics))
         for mic in mics:

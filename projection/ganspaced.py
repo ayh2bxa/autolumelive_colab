@@ -1,17 +1,12 @@
 import dnnlib
 from torch_utils import legacy
+from torch_utils.device_utils import get_default_device
 import torchvision
 import torch
 import numpy as np
 from ganspace.extract_pca import fit
 
-# Auto-detect best available device
-if torch.cuda.is_available():
-    device = "cuda"
-elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-    device = "mps"
-else:
-    device = "cpu"
+device = get_default_device()
 print(f"Using device: {device}")
 with dnnlib.util.open_url("/home/olaf/PycharmProjects/Autolume_Live_2/models/ffhq.pkl", verbose=False) as f:
     data = legacy.load_network_pkl(f, custom=True)

@@ -9,6 +9,7 @@ import cv2
 from super_res.net_base import SRVGGNetPlus, SRVGGNetCompact, RRDBNet
 import torch
 from torchvision import transforms
+from torch_utils.device_utils import get_default_device
 import torchvision.transforms.functional as F
 
 
@@ -124,13 +125,7 @@ def load_model(choice, path, device='cuda'):
 @click.option('--out_width', '-ow', required=False, type=click.INT, default=None, help='Output Width')
 @click.option('--out_height', '-oh', required=False, type=click.INT, default=None, help='Output Height')
 def super_res_main(input_dir, output_dir, scale_mode, sharpening_factor, model, scale_factor=None, out_width=None,out_height=None):
-    # Auto-detect best available device
-    if torch.cuda.is_available():
-        device = 'cuda'
-    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-        device = 'mps'
-    else:
-        device = 'cpu'
+    device = get_default_device()
     print(f"Using device: {device}")
 
     msg = "Running Super Resolution on " + ", ".join(input_dir) + " storing Results at" + output_dir + " with " + model + " model" + " and " + scale_mode + " scale mode"

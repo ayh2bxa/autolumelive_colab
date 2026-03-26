@@ -12,6 +12,7 @@ import threading
 import numpy as np
 import imgui
 import torch.cuda
+from torch_utils.device_utils import get_default_device
 
 from utils.gui_utils import imgui_utils
 from pythonosc.osc_server import BlockingOSCUDPServer
@@ -35,13 +36,7 @@ class PerformanceWidget:
         self.force_fp32 = False
         self.use_superres = False
         self.scale_factor = 0
-        # Initialize device with priority: CUDA > MPS > CPU
-        if torch.cuda.is_available():
-            self.device = "cuda"
-        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-            self.device = "mps"
-        else:
-            self.device = 'cpu'
+        self.device = get_default_device()
         self.mps_available = hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
         self.custom_kernel_available = False
     

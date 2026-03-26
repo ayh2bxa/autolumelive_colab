@@ -20,22 +20,15 @@ import dnnlib
 from bending.transform_layers import ManipulationLayer
 from torch_utils.ops import upfirdn2d, params
 from torch_utils import legacy
+from torch_utils.device_utils import get_default_device, get_autocast_device_type
 from architectures import custom_stylegan2
 from super_res.net_base import SRVGGNetPlus
 from modules.network_mixing import extract_conv_names, extract_mapping_names
 import os
 import pickle
 
-# Helper function to detect best available device
-def _get_default_device():
-    if torch.cuda.is_available():
-        return "cuda"
-    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-        return "mps"
-    return "cpu"
-
-super_res = SRVGGNetPlus(num_in_ch=3, num_out_ch=3, num_feat=48, upscale=4, act_type='prelu').eval().to(_get_default_device())
-model_sd=torch.load('./sr_models/Fast.pt', map_location=torch.device(_get_default_device()))
+super_res = SRVGGNetPlus(num_in_ch=3, num_out_ch=3, num_feat=48, upscale=4, act_type='prelu').eval().to(get_default_device())
+model_sd=torch.load('./sr_models/Fast.pt', map_location=torch.device(get_default_device()))
 super_res.load_state_dict(model_sd)
 
 # ----------------------------------------------------------------------------
@@ -228,16 +221,8 @@ def slerp(t, v0, v1, DOT_THRESHOLD=0.9995):
 class Renderer:
     def __init__(self):
         self.step_y = 100
-        # Initialize device with priority: CUDA > MPS > CPU
-        if torch.cuda.is_available():
-            self._device = torch.device('cuda')
-            self.kernel_type = "cuda"
-        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-            self._device = torch.device('mps')
-            self.kernel_type = "mps"
-        else:
-            self._device = torch.device('cpu')
-            self.kernel_type = "cpu"
+        self.kernel_type = get_default_device()
+        self._device = torch.device(self.kernel_type)
         self._pkl_data = dict()  # {pkl: dict | CapturedException, ...}
         self._networks = dict()  # {cache_key: torch.nn.Module, ...}
         self._pinned_bufs = dict()  # {(shape, dtype): torch.Tensor, ...}
@@ -819,9 +804,7 @@ class Renderer:
                 if isinstance(out, tuple):
                     out = out[0]
                 if use_superres:
-                    # MPS doesn't support torch.autocast("mps"), use "cpu" mode instead
-                    device_type = "cpu" if self._device.type == "mps" else ("cuda" if self._device.type == "cuda" else "cpu")
-                    with torch.autocast(device_type):
+                    with torch.autocast(get_autocast_device_type(self._device)):
                         out = super_res(out)
         except CaptureSuccess as e:
             out = e.out
