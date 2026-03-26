@@ -33,13 +33,14 @@ venv/bin/pyinstaller main.py \
   --collect-all "setuptools" \
   --hidden-import "backports.tarfile"
 
-echo "Copying assets and models..."
+echo "Copying assets..."
 cp -r assets dist/Autolume/assets
+
+echo "Copying sr_models..."
 cp -r sr_models dist/Autolume/sr_models
-mkdir -p dist/Autolume/models
-cp models/*.pkl dist/Autolume/models/
 
 echo "Creating directories..."
+mkdir -p dist/Autolume/models
 mkdir -p dist/Autolume/screenshots
 mkdir -p dist/Autolume/recordings
 mkdir -p dist/Autolume/training-runs
