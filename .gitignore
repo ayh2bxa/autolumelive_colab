@@ -193,6 +193,5 @@ sr_models
 pretrained_model
 
 # Model weights
-*.pth
 *.pkl
 *.weights
